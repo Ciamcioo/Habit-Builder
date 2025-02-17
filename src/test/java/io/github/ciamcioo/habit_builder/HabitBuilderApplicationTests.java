@@ -1,10 +1,10 @@
-package io.github.ciamcioo.habbit_builder;
+package io.github.ciamcioo.habit_builder;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class HabbitBuilderApplicationTests {
+class HabitBuilderApplicationTests {
 
 	@Test
 	void contextLoads() {

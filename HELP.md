@@ -1,7 +1,7 @@
 # Read Me First
 The following was discovered as part of building this project:
 
-* The original package name 'io.github.ciamcioo.habbit-builder' is invalid and this project uses 'io.github.ciamcioo.habbit_builder' instead.
+* The original package name 'io.github.ciamcioo.habbit-builder' is invalid and this project uses 'io.github.ciamcioo.habit_builder' instead.
 
 # Getting Started
 
