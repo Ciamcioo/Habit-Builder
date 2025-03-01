@@ -34,4 +34,20 @@ public class HabitController {
                 HttpStatus.OK);
     }
 
+    @PostMapping("/add/habit")
+    public ResponseEntity<String> addHabit(@RequestBody HabitDto habit) {
+        return new ResponseEntity<>(
+                habitService.addHabit(habit),
+                HttpStatus.OK
+        );
+    }
+
+    @PostMapping("/add/habits")
+    public ResponseEntity<List<String>> addHabits(@RequestBody HabitDto... habits) {
+        return new ResponseEntity<>(
+                habitService.addHabits(habits),
+                HttpStatus.OK
+        );
+    }
+
 }

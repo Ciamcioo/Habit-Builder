@@ -5,6 +5,7 @@ import io.github.ciamcioo.habit_builder.entity.Habit;
 import io.github.ciamcioo.habit_builder.repository.HabitRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -14,6 +15,7 @@ public class HabitManagementService implements HabitService{
     private static final Logger log = LoggerFactory.getLogger(HabitManagementService.class);
 
     private static final String HABIT_NOT_PRESENT = "Habit with %s = %s does not exist";
+    private static final String HABIT_ALREADY_EXIST = "Habit with name = %s already exists in database";
 
     private final HabitRepository habitRepository;
 
@@ -45,6 +47,37 @@ public class HabitManagementService implements HabitService{
         return convertHabitToHabitDto(habit);
     }
 
+    @Override
+    public String addHabit(HabitDto habit) {
+        if (habitRepository.existsByName(habit.name())) {
+            throw new HabitAlreadyExistsException(String.format(HABIT_ALREADY_EXIST, habit.name()));
+        }
+
+        Habit record = new Habit(habit.name(),
+                                habit.frequency(),
+                                habit.startDate(),
+                                habit.endDate(),
+                                habit.reminder()
+        );
+
+        habitRepository.saveAndFlush(record);
+
+        return habit.name();
+    }
+
+    @Override
+    public List<String> addHabits(HabitDto... habitDtos) {
+        List<Habit> habitsToSave = Arrays.stream(habitDtos)
+                                            .filter(habitDto -> {
+                                                return !habitRepository.existsByName(habitDto.name());
+                                            })
+                                            .map(this::convertHabitDtoToHabit)
+                                            .toList();
+
+        habitRepository.saveAllAndFlush(habitsToSave);
+
+        return habitsToSave.stream().map(Habit::getName).toList();
+    }
 
     private HabitDto convertHabitToHabitDto(Habit habit) {
         return new HabitDto(habit.getName(),
@@ -53,6 +86,16 @@ public class HabitManagementService implements HabitService{
                             habit.getEndDate(),
                             habit.getReminder()
         );
+    }
+
+    private Habit convertHabitDtoToHabit(HabitDto habitDto) {
+        return new Habit(habitDto.name(),
+                        habitDto.frequency(),
+                        habitDto.startDate(),
+                        habitDto.endDate(),
+                        habitDto.reminder()
+        );
+
     }
 
 

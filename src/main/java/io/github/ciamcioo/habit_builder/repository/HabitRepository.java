@@ -11,5 +11,7 @@ public interface HabitRepository extends JpaRepository<Habit, Integer> {
 
     Optional<Habit> findHabitByName(String name);
 
+    Boolean existsByName(String name);
+
 
 }

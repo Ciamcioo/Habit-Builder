@@ -52,7 +52,7 @@ public class HabitBuilderTest {
 
     @Test
     void testBuilderHabitWithDefaultValues_BuildObjectShouldHaveTheSameValues() {
-        HabitDto builtHabit = builder.buildHabitDto();
+        HabitDto builtHabit = builder.withTestValues().buildHabitDto();
 
         assertAll(
                 () -> assertEquals(testName, builtHabit.name()),
@@ -95,7 +95,7 @@ public class HabitBuilderTest {
     @Test
     @DisplayName("The buildHabit() method should return a Habit object with fields set to their default values")
     void testBuildHabitWithDefaultValues() {
-        Habit builtHabit = builder.buildHabit();
+        Habit builtHabit = builder.withTestValues().buildHabit();
 
         assertAll(
                 () -> assertInstanceOf(UUID.class, builtHabit.getUUID()),

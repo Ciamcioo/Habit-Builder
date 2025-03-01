@@ -45,4 +45,5 @@ public class HabitManagementServiceTest {
                 () -> assertEquals(habit.getReminder(), habitDto.reminder())
         );
     }
+
 }

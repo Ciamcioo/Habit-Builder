@@ -16,7 +16,7 @@ public class HabitBuilder {
     private Boolean reminder;
 
     public static HabitBuilder getInstance() {
-        return new HabitBuilder().withTestValues();
+        return new HabitBuilder();
     }
 
     public HabitBuilder withUUID(UUID uuid) {

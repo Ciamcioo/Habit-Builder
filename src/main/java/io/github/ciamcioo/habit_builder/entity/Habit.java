@@ -11,9 +11,10 @@ public class Habit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id")
     private UUID uuid;
 
-    @Column(name = "habit_name", nullable = false)
+    @Column(name = "habit_name", nullable = false, unique = true)
     private String name;
 
     @Column(name = "habit_frequency", nullable = false)

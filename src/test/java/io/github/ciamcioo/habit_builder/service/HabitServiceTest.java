@@ -30,7 +30,7 @@ public class HabitServiceTest {
         habitService = new HabitManagementService(habitRepository);
 
 
-        habitDto = builder.buildHabitDto();
+        habitDto = builder.withTestValues().buildHabitDto();
     }
 
     @Test
@@ -87,6 +87,59 @@ public class HabitServiceTest {
 
         Exception exception = assertThrows(HabitNotPresent.class, () -> habitService.getHabitByName(invalidName));
         assertEquals(String.format(EXPECTED_MESSAGE_FOR_HABIT_NOT_PRESENT_EXCEPTION, "name", invalidName), exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("The addHabit() method should return a String object")
+    void addHabitShouldReturnHabitName() {
+        assertInstanceOf(String.class, habitService.addHabit(habitDto));
+    }
+
+    @Test
+    @DisplayName("The addHabit() method should return String which name matches the argument habitDto name")
+    void addHabitShouldReturnNameOfHabitDto() {
+        assertEquals(habitDto.name(), habitService.addHabit(habitDto));
+    }
+
+    @Test
+    @DisplayName("The addHabit() method should throw HabitAlreadyExistsException which indicates that habit with such a name already exists ")
+    void addHabitShouldThrowHabitAlreadyExistsException() {
+        when(habitRepository.existsByName(habitDto.name())).thenReturn(true);
+
+        assertThrows(HabitAlreadyExistsException.class, () -> habitService.addHabit(habitDto));
+    }
+
+    @Test
+    @DisplayName("The addHabits() method shouldn't return null")
+    void addHabitsShouldNotReturnNull() {
+        assertNotNull(habitService.addHabits(habitDto));
+    }
+
+    @Test
+    @DisplayName("The addHabits() method should return empty List if no argument is passed")
+    void addHabitsShouldReturnEmptyListIfArgumentsDoNotMuch() {
+        assertTrue(habitService.addHabits().isEmpty());
+    }
+
+    @Test
+    @DisplayName("The addHabits() method should return names of added habits")
+    void addHabitReturnsListOfAddedHabitsNames() {
+        HabitDto habitDto_1 = builder.withName("Test_habit_1").buildHabitDto();
+        HabitDto habitDto_2 = builder.withName("Test_habit_2").buildHabitDto();
+        HabitDto habitDto_3 = builder.withName("Test_habit_3").buildHabitDto();
+        HabitDto habitDto_4 = builder.withName("Test_habit_4").buildHabitDto();
+
+        List<String> expectedResultList = new ArrayList<>();
+
+        expectedResultList.add(habitDto_1.name());
+        expectedResultList.add(habitDto_2.name());
+        expectedResultList.add(habitDto_3.name());
+
+
+        when(habitRepository.existsByName(anyString())).thenReturn(false);
+        when(habitRepository.existsByName(habitDto_4.name())).thenReturn(true);
+
+        assertEquals(expectedResultList, habitService.addHabits(habitDto_1, habitDto_2, habitDto_3, habitDto_4));
     }
 
 

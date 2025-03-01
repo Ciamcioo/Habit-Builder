@@ -12,6 +12,9 @@ public interface HabitService {
 
     HabitDto getHabitByName(String name);
 
+    String addHabit(HabitDto habit);
+
+    List<String> addHabits(HabitDto... habitDtos);
 
 
 }
