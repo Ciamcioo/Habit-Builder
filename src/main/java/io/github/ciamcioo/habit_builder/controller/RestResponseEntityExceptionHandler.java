@@ -16,8 +16,16 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     @ExceptionHandler(value = {
         HabitAlreadyExistsException.class
     })
-    protected ResponseEntity<Object> handleUserError(RuntimeException exception, WebRequest request) {
+    protected ResponseEntity<Object> badRequestException(RuntimeException exception, WebRequest request) {
         return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
+
+    @ExceptionHandler(value = {
+            HabitNotPresent.class
+    })
+    protected ResponseEntity<Object> notFoundException(RuntimeException exception, WebRequest request) {
+        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+    }
+
 
 }
