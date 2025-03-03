@@ -20,6 +20,7 @@ public class HabitManagementServiceTest {
     private HabitManagementService habitManagementService;
     private HabitRepository habitRepository;
     private Habit habit;
+    private HabitDto habitDto;
 
     @BeforeEach
     void setup() {
@@ -27,6 +28,7 @@ public class HabitManagementServiceTest {
         habitManagementService = new HabitManagementService(habitRepository);
 
         habit = HabitBuilder.getInstance().buildHabit();
+        habitDto = HabitBuilder.getInstance().buildHabitDto();
     }
 
     @Test
@@ -45,5 +47,25 @@ public class HabitManagementServiceTest {
                 () -> assertEquals(habit.getReminder(), habitDto.reminder())
         );
     }
+
+    @Test
+    @DisplayName("Method convertHabitDtoToHabit() should return Habit object wiht the same values as the HabitDto has")
+    void convertHabitDtoToHabitTest() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        Method convertHabitDtoToHabit = HabitManagementService.class.getDeclaredMethod("convertHabitDtoToHabit", HabitDto.class);
+        convertHabitDtoToHabit.setAccessible(true);
+
+        Habit habit = (Habit) convertHabitDtoToHabit.invoke(habitManagementService, habitDto);
+
+        assertAll(
+                () -> assertEquals(habitDto.name(),habit.getName() ),
+                () -> assertEquals(habitDto.frequency(),habit.getFrequency()),
+                () -> assertEquals(habitDto.startDate(),habit.getStartDate()),
+                () -> assertEquals(habitDto.endDate(), habit.getEndDate()),
+                () -> assertEquals(habitDto.reminder(), habit.getReminder())
+        );
+    }
+
+
+
 
 }

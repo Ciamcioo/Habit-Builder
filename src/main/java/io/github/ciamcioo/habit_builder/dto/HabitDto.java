@@ -1,7 +1,5 @@
 package io.github.ciamcioo.habit_builder.dto;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.ciamcioo.habit_builder.commons.HabitFrequency;
 
 import java.time.LocalDate;
@@ -15,16 +13,19 @@ public record HabitDto(
     Boolean reminder
 ) {
 
-    @JsonCreator
-    public HabitDto(@JsonProperty("name") String name,
-                    @JsonProperty("frequency") HabitFrequency frequency) {
-        this(name,
-            frequency,
-            LocalDate.now(),
-            LocalDate.now().plusYears(1),
-            false
-        );
+    public HabitDto(String name,
+                    HabitFrequency frequency,
+                    LocalDate startDate,
+                    LocalDate endDate,
+                    Boolean reminder) {
+
+        this.name = name;
+        this.frequency = frequency;
+        this.startDate = startDate != null ? startDate : LocalDate.now();
+        this.endDate = endDate != null ? endDate : LocalDate.now().plusYears(1);
+        this.reminder = reminder != null ? reminder : false;
     }
+
 
     @Override
     public boolean equals(Object o) {

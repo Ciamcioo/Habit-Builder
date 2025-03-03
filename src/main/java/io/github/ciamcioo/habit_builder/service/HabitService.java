@@ -16,5 +16,7 @@ public interface HabitService {
 
     List<String> addHabits(HabitDto... habitDtos);
 
+    HabitDto updateHabit(String habitName, HabitDto updatedHabit);
+
 
 }

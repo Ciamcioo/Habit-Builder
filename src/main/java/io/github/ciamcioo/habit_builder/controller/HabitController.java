@@ -50,4 +50,12 @@ public class HabitController {
         );
     }
 
+    @PutMapping("/update/habit")
+    public ResponseEntity<HabitDto> updateHabit(@RequestParam String habitName, @RequestBody HabitDto updatedHabit) {
+        return new ResponseEntity<>(
+                habitService.updateHabit(habitName, updatedHabit),
+                HttpStatus.OK
+        );
+    }
+
 }

@@ -1,7 +1,7 @@
 package io.github.ciamcioo.habit_builder.controller;
 
-import io.github.ciamcioo.habit_builder.service.HabitAlreadyExistsException;
-import io.github.ciamcioo.habit_builder.service.HabitNotPresent;
+import io.github.ciamcioo.habit_builder.exceptions.HabitAlreadyExistsException;
+import io.github.ciamcioo.habit_builder.exceptions.HabitNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +21,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     }
 
     @ExceptionHandler(value = {
-            HabitNotPresent.class
+            HabitNotFoundException.class
     })
     protected ResponseEntity<Object> notFoundException(RuntimeException exception, WebRequest request) {
         return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), HttpStatus.NOT_FOUND, request);

@@ -18,6 +18,7 @@ public class Habit {
     private String name;
 
     @Column(name = "habit_frequency", nullable = false)
+    @Enumerated(EnumType.STRING)
     private HabitFrequency frequency;
 
     @Column(name = "start_date")
