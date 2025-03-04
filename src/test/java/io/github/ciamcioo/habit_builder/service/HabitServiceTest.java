@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class HabitServiceTest {
-    private static final String EXPECTED_MESSAGE_FOR_HABIT_FOUND_PRESENT_EXCEPTION = "Habit with name = %s not found";
+    private static final String HABIT_NOT_FOUND_EXCEPTION_MESSAGE = "Habit with name = %s not found";
 
     HabitService habitService;
     HabitRepository habitRepository;
@@ -91,7 +91,7 @@ public class HabitServiceTest {
         when(habitRepository.findHabitByName(invalidName)).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(HabitNotFoundException.class, () -> habitService.getHabitByName(invalidName));
-        assertEquals(String.format(EXPECTED_MESSAGE_FOR_HABIT_FOUND_PRESENT_EXCEPTION, invalidName), exception.getMessage());
+        assertEquals(String.format(HABIT_NOT_FOUND_EXCEPTION_MESSAGE, invalidName), exception.getMessage());
     }
 
     @Test
@@ -154,7 +154,7 @@ public class HabitServiceTest {
         when(habitRepository.findHabitByName(habitName)).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(HabitNotFoundException.class, () -> habitService.updateHabit(habitName, any(HabitDto.class)));
-        assertEquals(String.format(EXPECTED_MESSAGE_FOR_HABIT_FOUND_PRESENT_EXCEPTION, habitName), exception.getMessage());
+        assertEquals(String.format(HABIT_NOT_FOUND_EXCEPTION_MESSAGE, habitName), exception.getMessage());
     }
 
     @Test
@@ -189,6 +189,24 @@ public class HabitServiceTest {
         when(habitRepository.findHabitByName("already_used_name")).thenReturn(Optional.of(new Habit()));
 
         assertThrows(HabitAlreadyExistsException.class, () -> habitService.updateHabit(habitName, updatedHabit));
+    }
 
+    @Test
+    @DisplayName("The deletHabit() method should throw HabitNotFoundException with appropriate message if habit with provided habitName doesn't exist")
+    void deleteHabitMethodShouldThrowHabitNotFoundException() {
+        String habitToDelete = "habitToDelete";
+        when(habitRepository.findHabitByName(habitToDelete)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(HabitNotFoundException.class, () -> habitService.deleteHabit(habitToDelete));
+        assertEquals(String.format(HABIT_NOT_FOUND_EXCEPTION_MESSAGE, habitToDelete), exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("The deleteHabit() method should finish without excpetions if the habit was removed")
+    void deleteHabitMethodForCorectHabitName() {
+        String habitToDelete = "habitToDelete";
+        when(habitRepository.findHabitByName(habitToDelete)).thenReturn(Optional.of(new Habit()));
+
+        assertDoesNotThrow(() -> habitService.deleteHabit(habitToDelete));
     }
 }

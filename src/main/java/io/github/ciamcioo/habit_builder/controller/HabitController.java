@@ -58,4 +58,13 @@ public class HabitController {
         );
     }
 
+    @DeleteMapping("/delete/habit")
+    public ResponseEntity<String> deleteHabit(@RequestParam("habitName") String habitName) {
+        habitService.deleteHabit(habitName);
+        return new ResponseEntity<>(
+            "Habit was deleted",
+                HttpStatus.ACCEPTED
+        );
+    }
+
 }

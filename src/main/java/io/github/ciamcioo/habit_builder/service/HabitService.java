@@ -18,5 +18,7 @@ public interface HabitService {
 
     HabitDto updateHabit(String habitName, HabitDto updatedHabit);
 
+    void deleteHabit(String name);
+
 
 }

@@ -107,6 +107,17 @@ public class HabitManagementService implements HabitService{
         return updatedHabit;
     }
 
+    @Override
+    public void deleteHabit(String habitName) {
+        Optional<Habit> habit = habitRepository.findHabitByName(habitName);
+
+        if (habit.isEmpty()) {
+            throw new HabitNotFoundException(String.format(HABIT_NOT_FOUND, habitName));
+        }
+
+        habitRepository.delete(habit.get());
+    }
+
     private HabitDto convertHabitToHabitDto(Habit habit) {
         return new HabitDto(habit.getName(),
                             habit.getFrequency(),

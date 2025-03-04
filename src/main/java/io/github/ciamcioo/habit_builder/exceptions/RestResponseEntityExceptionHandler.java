@@ -1,7 +1,5 @@
-package io.github.ciamcioo.habit_builder.controller;
+package io.github.ciamcioo.habit_builder.exceptions;
 
-import io.github.ciamcioo.habit_builder.exceptions.HabitAlreadyExistsException;
-import io.github.ciamcioo.habit_builder.exceptions.HabitNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
