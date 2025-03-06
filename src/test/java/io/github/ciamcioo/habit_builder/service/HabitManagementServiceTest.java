@@ -27,8 +27,8 @@ public class HabitManagementServiceTest {
         habitRepository = mock(HabitRepository.class);
         habitManagementService = new HabitManagementService(habitRepository);
 
-        habit = HabitBuilder.getInstance().buildHabit();
-        habitDto = HabitBuilder.getInstance().buildHabitDto();
+        habit = HabitBuilder.getInstance().withTestValues().buildHabit();
+        habitDto = HabitBuilder.getInstance().withTestValues().buildHabitDto();
     }
 
     @Test
