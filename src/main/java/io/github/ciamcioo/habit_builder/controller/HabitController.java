@@ -3,8 +3,10 @@ package io.github.ciamcioo.habit_builder.controller;
 import io.github.ciamcioo.habit_builder.dto.HabitDto;
 import io.github.ciamcioo.habit_builder.entity.Habit;
 import io.github.ciamcioo.habit_builder.service.HabitService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +21,7 @@ public class HabitController {
         this.habitService = habitService;
     }
 
-    @GetMapping("/getAllHabits")
+    @GetMapping("/habits")
     public ResponseEntity<List<HabitDto>> getAllHabits() {
         return new ResponseEntity<>(
                habitService.getAllHabits(),
@@ -27,40 +29,40 @@ public class HabitController {
         );
     }
 
-    @GetMapping("/getHabit")
-    public ResponseEntity<HabitDto> getHabitByName(@RequestParam String name) {
+    @GetMapping("/habit/{name}")
+    public ResponseEntity<HabitDto> getHabitByName(@PathVariable("name") String name) {
         return new ResponseEntity<>(
                 habitService.getHabitByName(name),
                 HttpStatus.OK);
     }
 
-    @PostMapping("/add/habit")
-    public ResponseEntity<String> addHabit(@RequestBody HabitDto habit) {
+    @PostMapping("/habit")
+    public ResponseEntity<String> addHabit(@RequestBody @Valid HabitDto habit) {
         return new ResponseEntity<>(
                 habitService.addHabit(habit),
                 HttpStatus.OK
         );
     }
 
-    @PostMapping("/add/habits")
-    public ResponseEntity<List<String>> addHabits(@RequestBody HabitDto... habits) {
+    @PostMapping("/habits")
+    public ResponseEntity<List<String>> addHabits(@RequestBody @Valid HabitDto... habits) {
         return new ResponseEntity<>(
                 habitService.addHabits(habits),
                 HttpStatus.OK
         );
     }
 
-    @PutMapping("/update/habit")
-    public ResponseEntity<HabitDto> updateHabit(@RequestParam String habitName, @RequestBody HabitDto updatedHabit) {
+    @PutMapping("/habit/{name}")
+    public ResponseEntity<HabitDto> updateHabit(@PathVariable("name") String habitName, @RequestBody @Valid HabitDto updatedHabit) {
         return new ResponseEntity<>(
                 habitService.updateHabit(habitName, updatedHabit),
                 HttpStatus.OK
         );
     }
 
-    @DeleteMapping("/delete/habit")
-    public ResponseEntity<String> deleteHabit(@RequestParam("habitName") String habitName) {
-        habitService.deleteHabit(habitName);
+    @DeleteMapping("/habit/{name}")
+    public ResponseEntity<String> deleteHabit(@PathVariable("name") String name) {
+        habitService.deleteHabit(name);
         return new ResponseEntity<>(
             "Habit was deleted",
                 HttpStatus.ACCEPTED
