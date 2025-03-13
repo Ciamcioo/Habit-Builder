@@ -40,7 +40,7 @@ public class HabitController {
     public ResponseEntity<String> addHabit(@RequestBody @Valid HabitDto habit) {
         return new ResponseEntity<>(
                 habitService.addHabit(habit),
-                HttpStatus.OK
+                HttpStatus.CREATED
         );
     }
 
@@ -48,7 +48,7 @@ public class HabitController {
     public ResponseEntity<List<String>> addHabits(@RequestBody @Valid HabitDto... habits) {
         return new ResponseEntity<>(
                 habitService.addHabits(habits),
-                HttpStatus.OK
+                HttpStatus.CREATED
         );
     }
 
@@ -65,7 +65,7 @@ public class HabitController {
         habitService.deleteHabit(name);
         return new ResponseEntity<>(
             "Habit was deleted",
-                HttpStatus.ACCEPTED
+                HttpStatus.NO_CONTENT
         );
     }
 
