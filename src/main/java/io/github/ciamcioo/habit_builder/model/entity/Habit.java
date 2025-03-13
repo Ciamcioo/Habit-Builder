@@ -1,8 +1,7 @@
-package io.github.ciamcioo.habit_builder.entity;
+package io.github.ciamcioo.habit_builder.model.entity;
 
-import io.github.ciamcioo.habit_builder.commons.HabitFrequency;
+import io.github.ciamcioo.habit_builder.model.commons.HabitFrequency;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 import java.util.UUID;

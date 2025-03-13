@@ -1,6 +1,6 @@
-package io.github.ciamcioo.habit_builder.dto;
+package io.github.ciamcioo.habit_builder.model.dto;
 
-import io.github.ciamcioo.habit_builder.commons.HabitFrequency;
+import io.github.ciamcioo.habit_builder.model.commons.HabitFrequency;
 import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;

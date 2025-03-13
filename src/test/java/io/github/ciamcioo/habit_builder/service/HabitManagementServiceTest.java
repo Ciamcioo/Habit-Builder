@@ -1,8 +1,8 @@
 package io.github.ciamcioo.habit_builder.service;
 
-import io.github.ciamcioo.habit_builder.commons.HabitBuilder;
-import io.github.ciamcioo.habit_builder.dto.HabitDto;
-import io.github.ciamcioo.habit_builder.entity.Habit;
+import io.github.ciamcioo.habit_builder.util.HabitBuilder;
+import io.github.ciamcioo.habit_builder.model.dto.HabitDto;
+import io.github.ciamcioo.habit_builder.model.entity.Habit;
 
 import io.github.ciamcioo.habit_builder.repository.HabitRepository;
 import org.junit.jupiter.api.BeforeEach;

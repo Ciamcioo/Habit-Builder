@@ -1,4 +1,4 @@
-package io.github.ciamcioo.habit_builder.commons;
+package io.github.ciamcioo.habit_builder.model.commons;
 
 public enum HabitFrequency {
     DAILY,

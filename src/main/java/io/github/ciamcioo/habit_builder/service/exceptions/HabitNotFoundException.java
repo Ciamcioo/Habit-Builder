@@ -1,4 +1,4 @@
-package io.github.ciamcioo.habit_builder.exceptions;
+package io.github.ciamcioo.habit_builder.service.exceptions;
 
 public class HabitNotFoundException extends RuntimeException {
 

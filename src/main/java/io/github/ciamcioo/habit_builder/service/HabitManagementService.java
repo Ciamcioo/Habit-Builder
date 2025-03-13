@@ -1,9 +1,9 @@
 package io.github.ciamcioo.habit_builder.service;
 
-import io.github.ciamcioo.habit_builder.dto.HabitDto;
-import io.github.ciamcioo.habit_builder.entity.Habit;
-import io.github.ciamcioo.habit_builder.exceptions.HabitAlreadyExistsException;
-import io.github.ciamcioo.habit_builder.exceptions.HabitNotFoundException;
+import io.github.ciamcioo.habit_builder.model.dto.HabitDto;
+import io.github.ciamcioo.habit_builder.model.entity.Habit;
+import io.github.ciamcioo.habit_builder.service.exceptions.HabitAlreadyExistsException;
+import io.github.ciamcioo.habit_builder.service.exceptions.HabitNotFoundException;
 import io.github.ciamcioo.habit_builder.repository.HabitRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +27,6 @@ public class HabitManagementService implements HabitService{
     @Override
     public List<HabitDto> getAllHabits() {
         List<HabitDto> habits = new ArrayList<>();
-
         habitRepository.findAll()
                         .forEach(habit -> {
                             HabitDto habitDto = convertHabitToHabitDto(habit);

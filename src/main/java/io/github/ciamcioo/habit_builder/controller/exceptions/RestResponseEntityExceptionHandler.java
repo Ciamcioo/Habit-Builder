@@ -1,31 +1,30 @@
-package io.github.ciamcioo.habit_builder.exceptions;
+package io.github.ciamcioo.habit_builder.controller.exceptions;
 
-import jakarta.validation.ValidationException;
-import jakarta.xml.bind.ValidationEventHandler;
+import io.github.ciamcioo.habit_builder.service.exceptions.HabitAlreadyExistsException;
+import io.github.ciamcioo.habit_builder.service.exceptions.HabitNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = {
         HabitAlreadyExistsException.class
     })
-    protected ResponseEntity<Error> badRequestExceptionHandler(RuntimeException exception, WebRequest request) {
+    protected ResponseEntity<io.github.ciamcioo.habit_builder.controller.exceptions.Error> badRequestExceptionHandler(RuntimeException exception, WebRequest request) {
         return new ResponseEntity<>(
-                new Error(exception.getMessage()),
+                new io.github.ciamcioo.habit_builder.controller.exceptions.Error(exception.getMessage()),
                 HttpStatus.BAD_REQUEST
         );
     }
@@ -33,7 +32,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     @ExceptionHandler(value = {
             HabitNotFoundException.class
     })
-    protected ResponseEntity<Error> notFoundExceptionHandler(RuntimeException exception, WebRequest request) {
+    protected ResponseEntity<io.github.ciamcioo.habit_builder.controller.exceptions.Error> notFoundExceptionHandler(RuntimeException exception, WebRequest request) {
         return new ResponseEntity<>(
                 new Error(exception.getMessage()),
                 HttpStatus.NOT_FOUND

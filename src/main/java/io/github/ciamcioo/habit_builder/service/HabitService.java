@@ -1,10 +1,8 @@
 package io.github.ciamcioo.habit_builder.service;
 
-import io.github.ciamcioo.habit_builder.dto.HabitDto;
-import io.github.ciamcioo.habit_builder.entity.Habit;
+import io.github.ciamcioo.habit_builder.model.dto.HabitDto;
 
 import java.util.List;
-import java.util.UUID;
 
 public interface HabitService {
 

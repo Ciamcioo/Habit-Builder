@@ -1,16 +1,13 @@
 package io.github.ciamcioo.habit_builder.controller;
 
-import io.github.ciamcioo.habit_builder.dto.HabitDto;
-import io.github.ciamcioo.habit_builder.entity.Habit;
+import io.github.ciamcioo.habit_builder.model.dto.HabitDto;
 import io.github.ciamcioo.habit_builder.service.HabitService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("api")

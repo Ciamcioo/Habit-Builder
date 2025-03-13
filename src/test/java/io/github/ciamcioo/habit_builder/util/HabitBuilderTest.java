@@ -1,11 +1,12 @@
-package io.github.ciamcioo.habit_builder.commons;
+package io.github.ciamcioo.habit_builder.util;
 
-import io.github.ciamcioo.habit_builder.dto.HabitDto;
+import io.github.ciamcioo.habit_builder.model.commons.HabitFrequency;
+import io.github.ciamcioo.habit_builder.model.dto.HabitDto;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
-import io.github.ciamcioo.habit_builder.entity.Habit;
+import io.github.ciamcioo.habit_builder.model.entity.Habit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
