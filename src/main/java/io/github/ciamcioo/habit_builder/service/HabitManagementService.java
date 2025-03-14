@@ -2,9 +2,12 @@ package io.github.ciamcioo.habit_builder.service;
 
 import io.github.ciamcioo.habit_builder.model.dto.HabitDto;
 import io.github.ciamcioo.habit_builder.model.entity.Habit;
+import io.github.ciamcioo.habit_builder.service.aspect.EnableExceptionLogging;
+import io.github.ciamcioo.habit_builder.service.aspect.EnableMethodLogging;
 import io.github.ciamcioo.habit_builder.service.exceptions.HabitAlreadyExistsException;
 import io.github.ciamcioo.habit_builder.service.exceptions.HabitNotFoundException;
 import io.github.ciamcioo.habit_builder.repository.HabitRepository;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,7 @@ public class HabitManagementService implements HabitService{
     }
 
     @Override
+    @EnableMethodLogging
     public List<HabitDto> getAllHabits() {
         List<HabitDto> habits = new ArrayList<>();
         habitRepository.findAll()
@@ -37,6 +41,8 @@ public class HabitManagementService implements HabitService{
     }
 
     @Override
+    @EnableMethodLogging
+    @EnableExceptionLogging
     public HabitDto getHabitByName(String name) {
         Habit habit = habitRepository.findHabitByName(name)
                                      .orElseThrow(
@@ -47,6 +53,8 @@ public class HabitManagementService implements HabitService{
     }
 
     @Override
+    @EnableMethodLogging
+    @EnableExceptionLogging
     public String addHabit(HabitDto habit) {
         if (habitRepository.existsByName(habit.name())) {
             throw new HabitAlreadyExistsException(String.format(HABIT_ALREADY_EXIST, habit.name()));
@@ -59,13 +67,13 @@ public class HabitManagementService implements HabitService{
                                 habit.reminder()
         );
 
-        log.info(record.toString());
         habitRepository.saveAndFlush(record);
 
         return habit.name();
     }
 
     @Override
+    @EnableMethodLogging
     public List<String> addHabits(HabitDto... habitDtos) {
         List<Habit> habitsToSave = Arrays.stream(habitDtos)
                                             .filter(habitDto ->
@@ -74,13 +82,14 @@ public class HabitManagementService implements HabitService{
                                             .map(this::convertHabitDtoToHabit)
                                             .toList();
 
-        log.info(habitsToSave.toString());
         habitRepository.saveAllAndFlush(habitsToSave);
 
         return habitsToSave.stream().map(Habit::getName).toList();
     }
 
     @Override
+    @EnableMethodLogging
+    @EnableExceptionLogging
     public HabitDto updateHabit(String habitName, HabitDto updatedHabit) {
         Optional<Habit> recordToUpdate = habitRepository.findHabitByName(habitName);
         if (recordToUpdate.isEmpty()) {
@@ -107,6 +116,8 @@ public class HabitManagementService implements HabitService{
     }
 
     @Override
+    @EnableMethodLogging
+    @EnableExceptionLogging
     public void deleteHabit(String habitName) {
         Optional<Habit> habit = habitRepository.findHabitByName(habitName);
 

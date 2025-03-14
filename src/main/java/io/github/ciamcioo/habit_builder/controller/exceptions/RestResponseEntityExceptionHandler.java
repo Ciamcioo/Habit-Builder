@@ -1,5 +1,7 @@
 package io.github.ciamcioo.habit_builder.controller.exceptions;
 
+import io.github.ciamcioo.habit_builder.service.aspect.EnableMethodCallLogging;
+import io.github.ciamcioo.habit_builder.service.aspect.EnableMethodLogging;
 import io.github.ciamcioo.habit_builder.service.exceptions.HabitAlreadyExistsException;
 import io.github.ciamcioo.habit_builder.service.exceptions.HabitNotFoundException;
 import org.springframework.http.HttpHeaders;
@@ -22,9 +24,10 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     @ExceptionHandler(value = {
         HabitAlreadyExistsException.class
     })
-    protected ResponseEntity<io.github.ciamcioo.habit_builder.controller.exceptions.Error> badRequestExceptionHandler(RuntimeException exception, WebRequest request) {
+    @EnableMethodLogging
+    protected ResponseEntity<Error> badRequestExceptionHandler(RuntimeException exception, WebRequest request) {
         return new ResponseEntity<>(
-                new io.github.ciamcioo.habit_builder.controller.exceptions.Error(exception.getMessage()),
+                new Error(exception.getMessage()),
                 HttpStatus.BAD_REQUEST
         );
     }
@@ -32,13 +35,15 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     @ExceptionHandler(value = {
             HabitNotFoundException.class
     })
-    protected ResponseEntity<io.github.ciamcioo.habit_builder.controller.exceptions.Error> notFoundExceptionHandler(RuntimeException exception, WebRequest request) {
+    @EnableMethodLogging
+    protected ResponseEntity<Error> notFoundExceptionHandler(RuntimeException exception, WebRequest request) {
         return new ResponseEntity<>(
                 new Error(exception.getMessage()),
                 HttpStatus.NOT_FOUND
         );
     }
     @Override
+    @EnableMethodLogging
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException exception, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         Map<String, String> errors = new HashMap<>();
         exception.getAllErrors().forEach(error -> {
