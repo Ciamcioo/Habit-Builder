@@ -37,7 +37,6 @@ public record HabitDto(
         this.reminder = reminder != null ? reminder : false;
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

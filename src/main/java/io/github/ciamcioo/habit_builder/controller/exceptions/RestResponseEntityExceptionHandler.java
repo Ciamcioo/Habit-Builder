@@ -4,6 +4,8 @@ import io.github.ciamcioo.habit_builder.service.aspect.EnableMethodCallLogging;
 import io.github.ciamcioo.habit_builder.service.aspect.EnableMethodLogging;
 import io.github.ciamcioo.habit_builder.service.exceptions.HabitAlreadyExistsException;
 import io.github.ciamcioo.habit_builder.service.exceptions.HabitNotFoundException;
+import io.github.ciamcioo.habit_builder.service.exceptions.UserAlreadyExistsException;
+import io.github.ciamcioo.habit_builder.service.exceptions.UserNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -22,7 +24,8 @@ import java.util.Map;
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = {
-        HabitAlreadyExistsException.class
+        HabitAlreadyExistsException.class,
+        UserAlreadyExistsException.class
     })
     @EnableMethodLogging
     protected ResponseEntity<Error> badRequestExceptionHandler(RuntimeException exception, WebRequest request) {
@@ -33,7 +36,8 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     }
 
     @ExceptionHandler(value = {
-            HabitNotFoundException.class
+            HabitNotFoundException.class,
+            UserNotFoundException.class
     })
     @EnableMethodLogging
     protected ResponseEntity<Error> notFoundExceptionHandler(RuntimeException exception, WebRequest request) {
@@ -42,6 +46,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                 HttpStatus.NOT_FOUND
         );
     }
+
     @Override
     @EnableMethodLogging
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException exception, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
@@ -58,4 +63,5 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
             HttpStatus.BAD_REQUEST
         );
     }
+
 }
