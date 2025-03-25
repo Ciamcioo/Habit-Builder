@@ -3,6 +3,7 @@ package io.github.ciamcioo.habit_builder.service;
 import io.github.ciamcioo.habit_builder.model.dto.UserDTO;
 import io.github.ciamcioo.habit_builder.model.entity.User;
 import io.github.ciamcioo.habit_builder.repository.UserRepository;
+import io.github.ciamcioo.habit_builder.service.exceptions.ConversionException;
 import io.github.ciamcioo.habit_builder.util.UserBuilder;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,15 +20,18 @@ import static org.mockito.Mockito.mock;
 
 @SpringBootTest
 public class UserManagementServiceTest {
+    public static final String CONVERSION_EXCEPTION_FROM_USER_DTO_TO_USER  = "Conversion of UserDTO to User ended up with failure!";
+    public static final String CONVERSION_EXCEPTION_FROM_USER_TO_USER_DTO  = "Conversion of User to UserDTO ended up with failure!";
+
     private static UserManagementService userManagementService;
-    private static UserBuilder userBuilder;
+    private static UserBuilder           userBuilder;
 
     @BeforeAll
     static void setup() {
         UserRepository userRepository = mock(UserRepository.class);
-       userManagementService = new UserManagementService(userRepository);
+        userManagementService = new UserManagementService(userRepository);
 
-       userBuilder = UserBuilder.getInstance();
+        userBuilder = UserBuilder.getInstance();
     }
 
     @BeforeEach
@@ -62,6 +66,20 @@ public class UserManagementServiceTest {
                 () -> assertEquals(user.lastName(), userDTO.lastName()),
                 () -> assertEquals(user.age(), userDTO.age())
         );
+    }
+
+    @Test
+    @DisplayName("Method convertUserToUserDTO should throw ConversionException if Runtime exception occurs with appropriate exception message")
+    void convertUserToUserDTOShouldThrowConversionException() throws NoSuchMethodException {
+        Method convertUserToUserDTO = userManagementService.getClass().getDeclaredMethod("convertUserToUserDTO", User.class);
+        convertUserToUserDTO.setAccessible(true);
+
+        User notValidUser = null;
+
+        Exception exception = assertThrows(InvocationTargetException.class, () -> convertUserToUserDTO.invoke(userManagementService, notValidUser));
+        assertInstanceOf(ConversionException.class, exception.getCause());
+        assertEquals(CONVERSION_EXCEPTION_FROM_USER_TO_USER_DTO, exception.getCause().getMessage());
+
     }
 
     @Test
@@ -199,6 +217,20 @@ public class UserManagementServiceTest {
                 () -> assertEquals(userDTO.lastName(), resultUser.lastName()),
                 () -> assertEquals(userDTO.age(), resultUser.age())
         );
+    }
+
+    @Test
+    @DisplayName("Method convertUserDTOToUser should throw ConversionException if Runtime Exception occurs with appropriate exception message")
+    void convertUserDTOToUserShouldThrowConversionException() throws NoSuchMethodException {
+        Method convertUserDTOToUser = UserManagementService.class.getDeclaredMethod("convertUserDTOToUser", UserDTO.class);
+        convertUserDTOToUser.setAccessible(true);
+
+        UserDTO userDTO = null;
+
+        Exception exception = assertThrows(InvocationTargetException.class, () -> convertUserDTOToUser.invoke(userManagementService, userDTO));
+        assertInstanceOf(ConversionException.class, exception.getCause());
+        assertEquals(CONVERSION_EXCEPTION_FROM_USER_DTO_TO_USER, exception.getCause().getMessage());
+
     }
 
     @Test

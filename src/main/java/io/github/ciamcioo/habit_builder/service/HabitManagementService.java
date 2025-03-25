@@ -3,7 +3,9 @@ package io.github.ciamcioo.habit_builder.service;
 import io.github.ciamcioo.habit_builder.model.dto.HabitDto;
 import io.github.ciamcioo.habit_builder.model.entity.Habit;
 import io.github.ciamcioo.habit_builder.service.aspect.EnableExceptionLogging;
+import io.github.ciamcioo.habit_builder.service.aspect.EnableMethodCallLogging;
 import io.github.ciamcioo.habit_builder.service.aspect.EnableMethodLogging;
+import io.github.ciamcioo.habit_builder.service.exceptions.ConversionException;
 import io.github.ciamcioo.habit_builder.service.exceptions.HabitAlreadyExistsException;
 import io.github.ciamcioo.habit_builder.service.exceptions.HabitNotFoundException;
 import io.github.ciamcioo.habit_builder.repository.HabitRepository;
@@ -128,22 +130,30 @@ public class HabitManagementService implements HabitService{
         habitRepository.delete(habit.get());
     }
 
-    private HabitDto convertHabitToHabitDto(Habit habit) {
-        return new HabitDto(habit.getName(),
-                            habit.getFrequency(),
-                            habit.getStartDate(),
-                            habit.getEndDate(),
-                            habit.getReminder()
-        );
+    private HabitDTO convertHabitToHabitDto(Habit habit) throws ConversionException {
+        try {
+            return new HabitDTO(habit.getName(),
+                    habit.getFrequency(),
+                    habit.getStartDate(),
+                    habit.getEndDate(),
+                    habit.getReminder()
+            );
+        } catch (RuntimeException e) {
+            throw new ConversionException(Habit.class.getSimpleName(), HabitDTO.class.getSimpleName());
+        }
     }
 
-    private Habit convertHabitDtoToHabit(HabitDto habitDto) {
-        return new Habit(habitDto.name(),
-                        habitDto.frequency(),
-                        habitDto.startDate(),
-                        habitDto.endDate(),
-                        habitDto.reminder()
-        );
+    private Habit convertHabitDtoToHabit(HabitDTO habitDto) throws ConversionException {
+        try {
+            return new Habit(habitDto.name(),
+                    habitDto.frequency(),
+                    habitDto.startDate(),
+                    habitDto.endDate(),
+                    habitDto.reminder()
+            );
+        } catch (RuntimeException e) {
+            throw new ConversionException(HabitDTO.class.getSimpleName(), Habit.class.getSimpleName());
+        }
     }
 
 

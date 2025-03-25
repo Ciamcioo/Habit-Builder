@@ -2,10 +2,9 @@ package io.github.ciamcioo.habit_builder.controller.exceptions;
 
 import io.github.ciamcioo.habit_builder.service.aspect.EnableMethodCallLogging;
 import io.github.ciamcioo.habit_builder.service.aspect.EnableMethodLogging;
-import io.github.ciamcioo.habit_builder.service.exceptions.HabitAlreadyExistsException;
-import io.github.ciamcioo.habit_builder.service.exceptions.HabitNotFoundException;
-import io.github.ciamcioo.habit_builder.service.exceptions.UserAlreadyExistsException;
-import io.github.ciamcioo.habit_builder.service.exceptions.UserNotFoundException;
+import io.github.ciamcioo.habit_builder.service.exceptions.*;
+import jakarta.validation.constraints.Email;
+import org.springdoc.core.service.GenericResponseService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -23,9 +22,13 @@ import java.util.Map;
 @RestControllerAdvice
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
+    public RestResponseEntityExceptionHandler(GenericResponseService genericResponseService) {
+    }
+
     @ExceptionHandler(value = {
         HabitAlreadyExistsException.class,
-        UserAlreadyExistsException.class
+        UserAlreadyExistsException.class,
+        ConversionException.class
     })
     @EnableMethodLogging
     protected ResponseEntity<Error> badRequestExceptionHandler(RuntimeException exception, WebRequest request) {
@@ -61,6 +64,24 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return new ResponseEntity<>(
             errors,
             HttpStatus.BAD_REQUEST
+        );
+    }
+
+
+    @ExceptionHandler(value = {
+            RuntimeException.class
+    })
+    @EnableMethodLogging
+    protected ResponseEntity<Object> iternalServerExceptionHandler(RuntimeException exception, WebRequest request) {
+        Map<String, String> response = new HashMap<>();
+        response.put("server message", "Internal Server error");
+        response.put("exception message", exception.getMessage());
+        response.put("endpoint", request.getContextPath());
+        response.put("contact", "Feel free to contact our support using email: xyz@gmail.com");
+
+        return new ResponseEntity<>(
+                response,
+                HttpStatus.INTERNAL_SERVER_ERROR
         );
     }
 

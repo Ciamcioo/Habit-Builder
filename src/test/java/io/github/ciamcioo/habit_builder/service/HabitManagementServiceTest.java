@@ -1,5 +1,6 @@
 package io.github.ciamcioo.habit_builder.service;
 
+import io.github.ciamcioo.habit_builder.service.exceptions.ConversionException;
 import io.github.ciamcioo.habit_builder.util.HabitBuilder;
 import io.github.ciamcioo.habit_builder.model.dto.HabitDto;
 import io.github.ciamcioo.habit_builder.model.entity.Habit;
@@ -12,11 +13,13 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 public class HabitManagementServiceTest {
+    public static final String CONVERSION_EXCEPTION_FROM_HABIT_DTO_TO_HABIT_MESSAGE  = "Conversion of HabitDTO to Habit ended up with failure!";
+    public static final String CONVERSION_EXCEPTION_FROM_HABIT_TO_HABIT_DTO_MESSAGE  = "Conversion of Habit to HabitDTO ended up with failure!";
+
     private HabitManagementService habitManagementService;
     private HabitRepository habitRepository;
     private Habit habit;
@@ -24,7 +27,7 @@ public class HabitManagementServiceTest {
 
     @BeforeEach
     void setup() {
-        habitRepository = mock(HabitRepository.class);
+        HabitRepository habitRepository = mock(HabitRepository.class);
         habitManagementService = new HabitManagementService(habitRepository);
 
         habit = HabitBuilder.getInstance().withTestValues().buildHabit();
@@ -49,9 +52,23 @@ public class HabitManagementServiceTest {
     }
 
     @Test
-    @DisplayName("Method convertHabitDtoToHabit() should return Habit object wiht the same values as the HabitDto has")
+    @DisplayName("Method convertHabitToHabitDTO() should throw ConversionException with suitable message")
+    void convertHabitToHabitDTOShouldThrowConversionException() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Method convertHabitToHabitDto = HabitManagementService.class.getDeclaredMethod("convertHabitToHabitDto", Habit.class);
+        convertHabitToHabitDto.setAccessible(true);
+
+        Habit testHabit = null;
+
+        Exception exception = assertThrows(InvocationTargetException.class, () ->  convertHabitToHabitDto.invoke(habitManagementService, testHabit));
+        assertInstanceOf(ConversionException.class, exception.getCause());
+        assertEquals(CONVERSION_EXCEPTION_FROM_HABIT_TO_HABIT_DTO_MESSAGE,
+                     exception.getCause().getMessage());
+    }
+
+    @Test
+    @DisplayName("Method convertHabitDtoToHabit() should return Habit object wiht the same values as the HabitDTO has")
     void convertHabitDtoToHabitTest() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        Method convertHabitDtoToHabit = HabitManagementService.class.getDeclaredMethod("convertHabitDtoToHabit", HabitDto.class);
+        Method convertHabitDtoToHabit = HabitManagementService.class.getDeclaredMethod("convertHabitDtoToHabit", HabitDTO.class);
         convertHabitDtoToHabit.setAccessible(true);
 
         Habit habit = (Habit) convertHabitDtoToHabit.invoke(habitManagementService, habitDto);
@@ -64,6 +81,22 @@ public class HabitManagementServiceTest {
                 () -> assertEquals(habitDto.reminder(), habit.getReminder())
         );
     }
+
+    @Test
+    @DisplayName("Method convertHabitDtoToHabit() should throw ConversionException with sutiable message")
+    void convertHabitDtoToHabitShouldThrowConversionException() throws NoSuchMethodException {
+        Method convertHabitDtoToHabit = HabitManagementService.class.getDeclaredMethod("convertHabitDtoToHabit", HabitDTO.class);
+        convertHabitDtoToHabit.setAccessible(true);
+
+        HabitDTO testHabit = null;
+
+        Exception exception = assertThrows(InvocationTargetException.class, () ->  convertHabitDtoToHabit.invoke(habitManagementService, testHabit));
+        assertInstanceOf(ConversionException.class, exception.getCause());
+
+        assertEquals(CONVERSION_EXCEPTION_FROM_HABIT_DTO_TO_HABIT_MESSAGE,
+                     exception.getCause().getMessage());
+    }
+
 
 
 
