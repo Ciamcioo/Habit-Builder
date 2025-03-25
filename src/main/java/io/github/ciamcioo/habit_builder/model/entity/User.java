@@ -55,7 +55,7 @@ public class User {
         this.age = age;
     }
 
-    public UUID id() {
+    public UUID getId() {
         return id;
     }
 
@@ -63,7 +63,7 @@ public class User {
         this.id = id;
     }
 
-    public String email() {
+    public String getEmail() {
         return email;
     }
 
@@ -71,7 +71,7 @@ public class User {
         this.email = email;
     }
 
-    public String username() {
+    public String getUsername() {
         return username;
     }
 
@@ -79,7 +79,7 @@ public class User {
         this.username = username;
     }
 
-    public String firstName() {
+    public String getFirstName() {
         return firstName;
     }
 
@@ -87,7 +87,7 @@ public class User {
         this.firstName = firstName;
     }
 
-    public String lastName() {
+    public String getLastName() {
         return lastName;
     }
 
@@ -95,7 +95,7 @@ public class User {
         this.lastName = lastName;
     }
 
-    public Integer age() {
+    public Integer getAge() {
         return age;
     }
 

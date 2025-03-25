@@ -1,6 +1,6 @@
 package io.github.ciamcioo.habit_builder.service;
 
-import io.github.ciamcioo.habit_builder.model.dto.HabitDto;
+import io.github.ciamcioo.habit_builder.model.dto.HabitDTO;
 import io.github.ciamcioo.habit_builder.model.entity.Habit;
 import io.github.ciamcioo.habit_builder.service.aspect.EnableExceptionLogging;
 import io.github.ciamcioo.habit_builder.service.aspect.EnableMethodCallLogging;
@@ -10,17 +10,13 @@ import io.github.ciamcioo.habit_builder.service.exceptions.HabitAlreadyExistsExc
 import io.github.ciamcioo.habit_builder.service.exceptions.HabitNotFoundException;
 import io.github.ciamcioo.habit_builder.repository.HabitRepository;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
 public class HabitManagementService implements HabitService{
-    private static final Logger log = LoggerFactory.getLogger(HabitManagementService.class);
-
-    private static final String HABIT_NOT_FOUND = "Habit with name = %s not found";
+    private static final String HABIT_NOT_FOUND     = "Habit with name = %s not found";
     private static final String HABIT_ALREADY_EXIST = "Habit with name = %s already exists in database";
 
     private final HabitRepository habitRepository;
@@ -31,11 +27,11 @@ public class HabitManagementService implements HabitService{
 
     @Override
     @EnableMethodLogging
-    public List<HabitDto> getAllHabits() {
-        List<HabitDto> habits = new ArrayList<>();
+    public List<HabitDTO> getAllHabits() {
+        List<HabitDTO> habits = new ArrayList<>();
         habitRepository.findAll()
                         .forEach(habit -> {
-                            HabitDto habitDto = convertHabitToHabitDto(habit);
+                            HabitDTO habitDto = convertHabitToHabitDto(habit);
                             habits.add(habitDto);
                         });
 
@@ -45,7 +41,7 @@ public class HabitManagementService implements HabitService{
     @Override
     @EnableMethodLogging
     @EnableExceptionLogging
-    public HabitDto getHabitByName(String name) {
+    public HabitDTO getHabitByName(String name) {
         Habit habit = habitRepository.findHabitByName(name)
                                      .orElseThrow(
                                              () -> new HabitNotFoundException(String.format(HABIT_NOT_FOUND, name))
@@ -57,7 +53,7 @@ public class HabitManagementService implements HabitService{
     @Override
     @EnableMethodLogging
     @EnableExceptionLogging
-    public String addHabit(HabitDto habit) {
+    public String addHabit(HabitDTO habit) {
         if (habitRepository.existsByName(habit.name())) {
             throw new HabitAlreadyExistsException(String.format(HABIT_ALREADY_EXIST, habit.name()));
         }
@@ -76,8 +72,8 @@ public class HabitManagementService implements HabitService{
 
     @Override
     @EnableMethodLogging
-    public List<String> addHabits(HabitDto... habitDtos) {
-        List<Habit> habitsToSave = Arrays.stream(habitDtos)
+    public List<String> addHabits(HabitDTO... habitDTOs) {
+        List<Habit> habitsToSave = Arrays.stream(habitDTOs)
                                             .filter(habitDto ->
                                                 !habitRepository.existsByName(habitDto.name())
                                             )
@@ -92,7 +88,8 @@ public class HabitManagementService implements HabitService{
     @Override
     @EnableMethodLogging
     @EnableExceptionLogging
-    public HabitDto updateHabit(String habitName, HabitDto updatedHabit) {
+    public HabitDTO updateHabit(String habitName, HabitDTO updatedHabit) {
+
         Optional<Habit> recordToUpdate = habitRepository.findHabitByName(habitName);
         if (recordToUpdate.isEmpty()) {
             throw new HabitNotFoundException(String.format(HABIT_NOT_FOUND, habitName));
@@ -110,15 +107,13 @@ public class HabitManagementService implements HabitService{
         record.setEndDate(updatedHabit.endDate());
         record.setReminder(updatedHabit.reminder());
 
-        log.info(record.toString());
-
         habitRepository.saveAndFlush(record);
 
         return updatedHabit;
     }
 
     @Override
-    @EnableMethodLogging
+    @EnableMethodCallLogging
     @EnableExceptionLogging
     public void deleteHabit(String habitName) {
         Optional<Habit> habit = habitRepository.findHabitByName(habitName);

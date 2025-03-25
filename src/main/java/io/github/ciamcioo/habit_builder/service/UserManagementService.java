@@ -6,8 +6,10 @@ import io.github.ciamcioo.habit_builder.repository.UserRepository;
 import io.github.ciamcioo.habit_builder.service.aspect.EnableExceptionLogging;
 import io.github.ciamcioo.habit_builder.service.aspect.EnableMethodCallLogging;
 import io.github.ciamcioo.habit_builder.service.aspect.EnableMethodLogging;
+import io.github.ciamcioo.habit_builder.service.exceptions.ConversionException;
 import io.github.ciamcioo.habit_builder.service.exceptions.UserAlreadyExistsException;
 import io.github.ciamcioo.habit_builder.service.exceptions.UserNotFoundException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +19,10 @@ import java.util.*;
 
 @Service
 public class UserManagementService implements UserService {
-    private static final String USER_NOT_FOUND = "User with email = %s not found";
-    private static final String USER_ALREADY_EXISTS = "User with email: %s already exists";
     private static final Logger log = LoggerFactory.getLogger(UserManagementService.class);
+
+    private static final String USER_NOT_FOUND      = "User with email = %s not found";
+    private static final String USER_ALREADY_EXISTS = "User with email: %s already exists";
 
     private final UserRepository userRepository;
 
@@ -56,25 +59,22 @@ public class UserManagementService implements UserService {
         User user = convertUserDTOToUser(userDTO);
         userRepository.saveAndFlush(user);
 
-        return user.username();
+        return user.getUsername();
     }
 
     @Override
     @EnableMethodLogging
     public List<String> addUsers(List<UserDTO> userDTOs) {
         Set<UserDTO> uniqueUser = new HashSet<>(userDTOs);
-
         List<UserDTO> userDTOList = uniqueUser.stream()
                 .filter(userDTO -> userRepository.findUserByEmail(userDTO.email()).isEmpty())
                 .toList();
-
-
         List<User> users = convertUserDTOListToUserList(userDTOList);
 
         List<String> usernames = new ArrayList<>();
         users.forEach(user -> {
             userRepository.save(user);
-            usernames.add(user.username());
+            usernames.add(user.getUsername());
         });
         userRepository.flush();
 
@@ -128,34 +128,42 @@ public class UserManagementService implements UserService {
     }
 
     private UserDTO convertUserToUserDTO(User user) {
-        return new UserDTO(
-                user.email(),
-                user.username(),
-                user.firstName(),
-                user.lastName(),
-                user.age()
-        );
+        try {
+            return new UserDTO(
+                    user.getEmail(),
+                    user.getUsername(),
+                    user.getFirstName(),
+                    user.getLastName(),
+                    user.getAge()
+            );
+        } catch(RuntimeException e) {
+            throw new ConversionException(User.class.getSimpleName(), UserDTO.class.getSimpleName());
+        }
     }
 
 
     private List<User> convertUserDTOListToUserList(List<UserDTO> userDTOList) {
         List<User> userList = new ArrayList<>();
         userDTOList.forEach(userDTO ->
-            userList.add(
-                    convertUserDTOToUser(userDTO)
-            )
+                userList.add(
+                        convertUserDTOToUser(userDTO)
+                )
         );
         return Collections.unmodifiableList(userList);
     }
 
     private User convertUserDTOToUser(UserDTO userDTO) {
-       return new User(
-               userDTO.email(),
-               userDTO.username(),
-               userDTO.firstName(),
-               userDTO.lastName(),
-               userDTO.age()
-       );
+        try {
+            return new User(
+                    userDTO.email(),
+                    userDTO.username(),
+                    userDTO.firstName(),
+                    userDTO.lastName(),
+                    userDTO.age()
+            );
+        } catch(RuntimeException e) {
+            throw new ConversionException(UserDTO.class.getSimpleName(), User.class.getSimpleName());
+        }
     }
 
 

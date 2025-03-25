@@ -1,6 +1,5 @@
 package io.github.ciamcioo.habit_builder.model.dto;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
 import java.util.Objects;

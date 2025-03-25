@@ -1,7 +1,7 @@
 package io.github.ciamcioo.habit_builder.util;
 
 import io.github.ciamcioo.habit_builder.model.commons.HabitFrequency;
-import io.github.ciamcioo.habit_builder.model.dto.HabitDto;
+import io.github.ciamcioo.habit_builder.model.dto.HabitDTO;
 import io.github.ciamcioo.habit_builder.model.entity.Habit;
 
 import java.time.LocalDate;
@@ -9,12 +9,12 @@ import java.util.UUID;
 
 public class HabitBuilder {
 
-    private UUID uuid;
-    private String name;
+    private UUID           uuid;
+    private String         name;
     private HabitFrequency frequency;
-    private LocalDate startDate;
-    private LocalDate endDate;
-    private Boolean reminder;
+    private LocalDate      startDate;
+    private LocalDate      endDate;
+    private Boolean        reminder;
 
     public static HabitBuilder getInstance() {
         return new HabitBuilder();
@@ -51,19 +51,19 @@ public class HabitBuilder {
     }
 
     public HabitBuilder withTestValues() {
-        uuid = UUID.randomUUID();
-        name = "Foo_habit";
+        uuid      = UUID.randomUUID();
+        name      = "Foo_habit";
         frequency = HabitFrequency.DAILY;
         startDate = LocalDate.now().minusDays(1);
-        endDate = LocalDate.now().plusYears(1);
-        reminder = true;
+        endDate   = LocalDate.now().plusYears(1);
+        reminder  = true;
 
         return this;
     }
 
 
-    public HabitDto buildHabitDto() {
-        return new HabitDto(name,
+    public HabitDTO buildHabitDto() {
+        return new HabitDTO(name,
                             frequency,
                             startDate,
                             endDate,
@@ -73,11 +73,11 @@ public class HabitBuilder {
 
     public Habit buildHabit() {
         return new Habit(uuid,
-                        name,
-                        frequency,
-                        startDate,
-                        endDate,
-                        reminder
+                         name,
+                         frequency,
+                         startDate,
+                         endDate,
+                         reminder
         );
     }
 }

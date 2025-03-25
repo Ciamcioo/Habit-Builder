@@ -1,21 +1,20 @@
 package io.github.ciamcioo.habit_builder.service;
 
-import io.github.ciamcioo.habit_builder.model.dto.HabitDto;
-import io.github.ciamcioo.habit_builder.service.aspect.EnableMethodCallLogging;
+import io.github.ciamcioo.habit_builder.model.dto.HabitDTO;
 
 import java.util.List;
 
 public interface HabitService {
 
-    List<HabitDto> getAllHabits();
+    List<HabitDTO> getAllHabits();
 
-    HabitDto getHabitByName(String name);
+    HabitDTO getHabitByName(String name);
 
-    String addHabit(HabitDto habit);
+    String addHabit(HabitDTO habit);
 
-    List<String> addHabits(HabitDto... habitDtos);
+    List<String> addHabits(HabitDTO... habitDTOs);
 
-    HabitDto updateHabit(String habitName, HabitDto updatedHabit);
+    HabitDTO updateHabit(String habitName, HabitDTO updatedHabit);
 
 
     void deleteHabit(String name);

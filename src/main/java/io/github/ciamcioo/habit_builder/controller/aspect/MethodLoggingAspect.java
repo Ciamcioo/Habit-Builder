@@ -1,11 +1,9 @@
 package io.github.ciamcioo.habit_builder.controller.aspect;
 
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -39,7 +37,7 @@ public class MethodLoggingAspect {
 
     @AfterThrowing(value = "@annotation(io.github.ciamcioo.habit_builder.service.aspect.EnableExceptionLogging)", throwing = "exception")
     public void logException(JoinPoint joinPoint, Throwable exception) {
-        log.warn("Event: {}, Method: {}, Exception tyep: {}, Exception message: {}",
+        log.warn("Event: {}, Method: {}, Exception type: {}, Exception message: {}",
                  "Exception thrown",
                  joinPoint.toShortString(),
                  exception.getCause(),

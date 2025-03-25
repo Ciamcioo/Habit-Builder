@@ -1,7 +1,7 @@
 package io.github.ciamcioo.habit_builder.util;
 
 import io.github.ciamcioo.habit_builder.model.commons.HabitFrequency;
-import io.github.ciamcioo.habit_builder.model.dto.HabitDto;
+import io.github.ciamcioo.habit_builder.model.dto.HabitDTO;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -14,11 +14,13 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class HabitBuilderTest {
+
+    public static final String         testName      = "Foo_habit";
+    public static final HabitFrequency testFrequency = HabitFrequency.DAILY;
+    public static final LocalDate      testStartDate = LocalDate.now().minusDays(1);
+    public static final LocalDate      testEndDate   = LocalDate.now().plusYears(1);
+
     HabitBuilder builder;
-    private final String testName = "Foo_habit";
-    private final HabitFrequency testFrequency = HabitFrequency.DAILY;
-    private final LocalDate testStartDate = LocalDate.now().minusDays(1);
-    private final LocalDate testEndDate = LocalDate.now().plusYears(1);
 
 
     @BeforeEach
@@ -28,19 +30,20 @@ public class HabitBuilderTest {
 
     @Test
     void testBuilderHabitInputData_HabitDataShouldBeTheSameAsBuilderOne() {
-        String name = "Habit name";
-        HabitFrequency frequency = HabitFrequency.MONTHLY;
-        LocalDate startDate = LocalDate.now().minusDays(4);
-        LocalDate endDate = LocalDate.now().plusDays(5);
-        Boolean reminder = false;
 
-        builder.withName(name)
+        String         name      = "Habit name";
+        HabitFrequency frequency = HabitFrequency.MONTHLY;
+        LocalDate      startDate = LocalDate.now().minusDays(4);
+        LocalDate      endDate   = LocalDate.now().plusDays(5);
+        Boolean        reminder  = false;
+
+        builder = builder.withName(name)
                 .withFrequency(frequency)
                 .withStartDate(startDate)
                 .withEndDate(endDate)
                 .withReminder(reminder);
 
-        HabitDto builtHabit = builder.buildHabitDto();
+        HabitDTO builtHabit = builder.buildHabitDto();
 
         assertAll(
                 () -> assertEquals(name, builtHabit.name()),
@@ -53,7 +56,7 @@ public class HabitBuilderTest {
 
     @Test
     void testBuilderHabitWithDefaultValues_BuildObjectShouldHaveTheSameValues() {
-        HabitDto builtHabit = builder.withTestValues().buildHabitDto();
+        HabitDTO builtHabit = builder.withTestValues().buildHabitDto();
 
         assertAll(
                 () -> assertEquals(testName, builtHabit.name()),
@@ -67,12 +70,13 @@ public class HabitBuilderTest {
     @Test
     @DisplayName("The buildHabit() method should return a Habit object with fields equals to set values.")
     void testBuildHabitForSetValues() {
-        UUID uuid = UUID.randomUUID();
-        String name = "Habit name";
+
+        UUID           uuid      = UUID.randomUUID();
+        String         name      = "Habit name";
         HabitFrequency frequency = HabitFrequency.MONTHLY;
-        LocalDate startDate = LocalDate.now().minusDays(4);
-        LocalDate endDate = LocalDate.now().plusDays(5);
-        Boolean reminder = false;
+        LocalDate      startDate = LocalDate.now().minusDays(4);
+        LocalDate      endDate   = LocalDate.now().plusDays(5);
+        Boolean        reminder  = false;
 
         builder.withUUID(uuid)
                 .withName(name)

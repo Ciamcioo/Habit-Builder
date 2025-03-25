@@ -1,8 +1,7 @@
 package io.github.ciamcioo.habit_builder.controller;
 
-import io.github.ciamcioo.habit_builder.model.dto.HabitDto;
+import io.github.ciamcioo.habit_builder.model.dto.HabitDTO;
 import io.github.ciamcioo.habit_builder.service.HabitService;
-import io.github.ciamcioo.habit_builder.service.aspect.EnableMethodCallLogging;
 import io.github.ciamcioo.habit_builder.service.aspect.EnableMethodLogging;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -14,7 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("api")
 public class HabitController {
-    private HabitService habitService;
+    private final HabitService habitService;
 
     public HabitController(HabitService habitService) {
         this.habitService = habitService;
@@ -22,7 +21,7 @@ public class HabitController {
 
     @GetMapping("/habits")
     @EnableMethodLogging
-    public ResponseEntity<List<HabitDto>> getAllHabits() {
+    public ResponseEntity<List<HabitDTO>> getAllHabits() {
         return new ResponseEntity<>(
                habitService.getAllHabits(),
                HttpStatus.OK
@@ -31,7 +30,7 @@ public class HabitController {
 
     @GetMapping("/habit/{name}")
     @EnableMethodLogging
-    public ResponseEntity<HabitDto> getHabitByName(@PathVariable("name") String name) {
+    public ResponseEntity<HabitDTO> getHabitByName(@PathVariable("name") String name) {
         return new ResponseEntity<>(
                 habitService.getHabitByName(name),
                 HttpStatus.OK);
@@ -39,7 +38,7 @@ public class HabitController {
 
     @PostMapping("/habit")
     @EnableMethodLogging
-    public ResponseEntity<String> addHabit(@RequestBody @Valid HabitDto habit) {
+    public ResponseEntity<String> addHabit(@RequestBody @Valid HabitDTO habit) {
         return new ResponseEntity<>(
                 habitService.addHabit(habit),
                 HttpStatus.CREATED
@@ -48,7 +47,7 @@ public class HabitController {
 
     @PostMapping("/habits")
     @EnableMethodLogging
-    public ResponseEntity<List<String>> addHabits(@RequestBody @Valid HabitDto... habits) {
+    public ResponseEntity<List<String>> addHabits(@RequestBody @Valid HabitDTO... habits) {
         return new ResponseEntity<>(
                 habitService.addHabits(habits),
                 HttpStatus.CREATED
@@ -57,7 +56,7 @@ public class HabitController {
 
     @PutMapping("/habit/{name}")
     @EnableMethodLogging
-    public ResponseEntity<HabitDto> updateHabit(@PathVariable("name") String habitName, @RequestBody @Valid HabitDto updatedHabit) {
+    public ResponseEntity<HabitDTO> updateHabit(@PathVariable("name") String habitName, @RequestBody @Valid HabitDTO updatedHabit) {
         return new ResponseEntity<>(
                 habitService.updateHabit(habitName, updatedHabit),
                 HttpStatus.OK
@@ -73,5 +72,7 @@ public class HabitController {
                 HttpStatus.NO_CONTENT
         );
     }
+
+
 
 }

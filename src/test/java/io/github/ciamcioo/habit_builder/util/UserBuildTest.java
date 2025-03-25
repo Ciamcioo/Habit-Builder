@@ -13,23 +13,24 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 public class UserBuildTest {
-    public static final String DEF_USERNAME = "FooBar";
-    public static final String DEF_FIRST_NAME = "Foo";
-    private static final String DEF_LAST_NAME = "Bar";
-    private static final Integer DEF_AGE = 21;
+    public static final String  DEF_USERNAME   = "FooBar";
+    public static final String  DEF_FIRST_NAME = "Foo";
+    public static final String  DEF_LAST_NAME  = "Bar";
+    public static final Integer DEF_AGE        = 21;
+    public static final String  DEF_EMAIL      = "fooBar@gmail.com";
 
-    public static final String USERNAME = "BarFoo";
-    public static final String EMAIL = "barfoo@gov.com";
-    public static final String FIRST_NAME = "Bar";
-    public static final String LAST_NAME = "Foo";
-    public static final int AGE = 99;
-    public static final String DEF_EMAIL = "fooBar@gmail.com";
+    public static final String  USERNAME    = "BarFoo";
+    public static final String  EMAIL       = "barfoo@gov.com";
+    public static final String  FIRST_NAME  = "Bar";
+    public static final String  LAST_NAME   = "Foo";
+    public static final int     AGE         = 99;
+
 
     private static UserBuilder userBuilder = UserBuilder.getInstance();
 
     @BeforeEach
     void setup() {
-        userBuilder =  userBuilder.withTestValues();
+        userBuilder = userBuilder.withTestValues();
     }
 
     @Test
@@ -39,12 +40,12 @@ public class UserBuildTest {
         User user = userBuilder.buildUser();
 
         assertAll(
-                () -> assertInstanceOf(UUID.class, user.id()),
-                () -> assertEquals(DEF_EMAIL, user.email()),
-                () -> assertEquals(DEF_USERNAME, user.username()),
-                () -> assertEquals(DEF_FIRST_NAME, user.firstName()),
-                () -> assertEquals(DEF_LAST_NAME, user.lastName()),
-                () -> assertEquals(DEF_AGE, user.age())
+                () -> assertInstanceOf(UUID.class, user.getId()),
+                () -> assertEquals(DEF_EMAIL, user.getEmail()),
+                () -> assertEquals(DEF_USERNAME, user.getUsername()),
+                () -> assertEquals(DEF_FIRST_NAME, user.getFirstName()),
+                () -> assertEquals(DEF_LAST_NAME, user.getLastName()),
+                () -> assertEquals(DEF_AGE, user.getAge())
         );
     }
 
@@ -62,12 +63,12 @@ public class UserBuildTest {
         User user = userBuilder.buildUser();
 
         assertAll(
-                () -> assertEquals(randomUUID, user.id()),
-                () -> assertEquals(EMAIL, user.email()),
-                () -> assertEquals(USERNAME, user.username()),
-                () -> assertEquals(FIRST_NAME, user.firstName()),
-                () -> assertEquals(LAST_NAME, user.lastName()),
-                () -> assertEquals(AGE, user.age())
+                () -> assertEquals(randomUUID, user.getId()),
+                () -> assertEquals(EMAIL, user.getEmail()),
+                () -> assertEquals(USERNAME, user.getUsername()),
+                () -> assertEquals(FIRST_NAME, user.getFirstName()),
+                () -> assertEquals(LAST_NAME, user.getLastName()),
+                () -> assertEquals(AGE, user.getAge())
         );
     }
 
@@ -86,7 +87,7 @@ public class UserBuildTest {
     }
 
     @Test
-    @DisplayName("Method buildUserDTO() should return UserDTO instance with fields containing values set beofre build")
+    @DisplayName("Method buildUserDTO() should return UserDTO instance with fields containing values set before build")
     void buildUserDtoWithPreviouslySetValues() {
         userBuilder = userBuilder.withUsername(USERNAME)
                 .withEmail(EMAIL)

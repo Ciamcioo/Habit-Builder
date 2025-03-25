@@ -12,7 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
@@ -25,19 +24,21 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 public class UserServiceTest {
    public static final String TEST_EMAIL_ADDRESS = "test@gmail.com";
-   public static final String TEST_USERNAME = "FooBarUsername";
+   public static final String TEST_USERNAME      = "FooBarUsername";
 
-   private static UserService userService;
+   private static UserService    userService;
    private static UserRepository userRepository;
-   private static UserBuilder userBuilder = UserBuilder.getInstance();
-    @Autowired
-    private HabitRepository habitRepository;
+   private static UserBuilder    userBuilder = UserBuilder.getInstance();
+
+   private HabitRepository habitRepository;
 
    @BeforeEach
    void beforeEachSetUp() {
       userRepository = mock(UserRepository.class);
       userService = new UserManagementService(userRepository);
       userBuilder = userBuilder.withTestValues();
+
+      habitRepository = mock(HabitRepository.class);
    }
 
 
@@ -71,9 +72,7 @@ public class UserServiceTest {
        assertFalse(userService.getAllUsers().isEmpty());
    }
 
-
    // GET SINGLE USER TEST
-
 
    @Test
    @DisplayName("Method getUser() cannot return null")
@@ -87,7 +86,7 @@ public class UserServiceTest {
 
    @Test
    @DisplayName("Method getUser() should return user with matching email address to argument email address")
-   void returnUserEmailMustMatchEmailInArgument() {
+   void returnUserEmailMustMatchGetEmailInArgument() {
       User user = userBuilder.withEmail(TEST_EMAIL_ADDRESS).buildUser();
 
       when(userRepository.findUserByEmail(TEST_EMAIL_ADDRESS)).thenReturn(Optional.of(user));
@@ -104,9 +103,7 @@ public class UserServiceTest {
 
       when(userRepository.findUserByEmail(testUserDTO.email())).thenReturn(Optional.of(testUser));
 
-      UserDTO resultUserDTO = userService.getUser(testUserDTO.email());
-
-      assertEquals(testUserDTO, resultUserDTO);
+      assertEquals(testUserDTO, userService.getUser(testUserDTO.email()));
    }
 
    @Test
@@ -115,7 +112,6 @@ public class UserServiceTest {
       String testEmail = "not_existing_user_email@gmail.com";
 
       when(userRepository.findUserByEmail(testEmail)).thenReturn(Optional.empty());
-
 
       assertThrows(UserNotFoundException.class, () -> userService.getUser(testEmail));
    }
@@ -128,13 +124,12 @@ public class UserServiceTest {
       UserDTO userDTO = userBuilder.withEmail(TEST_EMAIL_ADDRESS)
                                    .buildUserDTO();
 
-
       assertNotNull(userService.addUser(userDTO));
    }
 
    @Test
    @DisplayName("Method addUser() should return the name of created user")
-   void addUserShouldReturnTheUsernameOfCreatedUser() {
+   void addUserShouldReturnTheGetUsernameOfCreatedUser() {
       UserDTO userDTO = userBuilder.buildUserDTO();
 
       assertEquals(userDTO.username(), userService.addUser(userDTO));
@@ -148,7 +143,6 @@ public class UserServiceTest {
       when(userRepository.findUserByEmail(userDTO.email())).thenReturn(Optional.of(new User()));
 
       assertThrows(UserAlreadyExistsException.class, () -> userService.addUser(userDTO));
-
    }
 
    // ADD MULTIPLE USERS AT ONCE TEST
@@ -174,7 +168,7 @@ public class UserServiceTest {
 
    @Test
    @DisplayName("Method addUsers() should return String List with usernames of added user")
-   void addUsersShouldReturnUsernameList() {
+   void addUsersShouldReturnGetUsernameList() {
       List<UserDTO> userDTOs = List.of(
               userBuilder.buildUserDTO(),
               userBuilder.withEmail(TEST_EMAIL_ADDRESS)
@@ -202,13 +196,13 @@ public class UserServiceTest {
       assertEquals(1, userService.addUsers(notUniqueUserDTOs).size());
   }
 
-
    // UPDATE USER TESTS
 
    @Test
    @DisplayName("Method updateUser() should not return null value")
    void updateUserShouldNotReturnNullValue() {
       when(userRepository.findUserByEmail(TEST_EMAIL_ADDRESS)).thenReturn(Optional.of(new User()));
+
       assertNotNull(userService.updateUser(TEST_EMAIL_ADDRESS, userBuilder.buildUserDTO()));
    }
 
@@ -219,18 +213,16 @@ public class UserServiceTest {
 
       when(userRepository.findUserByEmail(TEST_EMAIL_ADDRESS)).thenReturn(Optional.of(new User()));
 
-      UserDTO resultObject = userService.updateUser(TEST_EMAIL_ADDRESS, user);
-
-      assertEquals(user, resultObject);
+      assertEquals(user, userService.updateUser(TEST_EMAIL_ADDRESS, user));
    }
 
    @Test
    @DisplayName("Method updateUser() should throw new UserAlreadyExistsException if user tries to updated email to already existing one")
-   void updateUserShouldThrowUserAlreadyExistsExceptionIfEmailOfUpdatedUserIsAlreadyInDatabase() {
+   void updateUserShouldThrowUserAlreadyExistsExceptionIfGetEmailOfUpdatedUserIsAlreadyInDatabase() {
       UserDTO userToUpdate = userBuilder.withEmail(TEST_EMAIL_ADDRESS)
                                         .buildUserDTO();
-
       String tmpEmailAddress = "otherTestEmail@gmail.com";
+
       when(userRepository.findUserByEmail(tmpEmailAddress)).thenReturn(Optional.of(new User()));
       when(userRepository.findUserByEmail(TEST_EMAIL_ADDRESS)).thenReturn(Optional.of(new User()));
 
@@ -256,7 +248,6 @@ public class UserServiceTest {
       when(userRepository.findUserByEmail(TEST_EMAIL_ADDRESS)).thenReturn(Optional.empty());
 
       assertThrows(UserNotFoundException.class, () -> userService.deleteUser(TEST_EMAIL_ADDRESS));
-
    }
 
 

@@ -1,11 +1,12 @@
 package io.github.ciamcioo.habit_builder.service;
 
+import io.github.ciamcioo.habit_builder.model.dto.HabitDTO;
 import io.github.ciamcioo.habit_builder.service.exceptions.ConversionException;
 import io.github.ciamcioo.habit_builder.util.HabitBuilder;
-import io.github.ciamcioo.habit_builder.model.dto.HabitDto;
 import io.github.ciamcioo.habit_builder.model.entity.Habit;
 
 import io.github.ciamcioo.habit_builder.repository.HabitRepository;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,13 +18,25 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 public class HabitManagementServiceTest {
+
     public static final String CONVERSION_EXCEPTION_FROM_HABIT_DTO_TO_HABIT_MESSAGE  = "Conversion of HabitDTO to Habit ended up with failure!";
     public static final String CONVERSION_EXCEPTION_FROM_HABIT_TO_HABIT_DTO_MESSAGE  = "Conversion of Habit to HabitDTO ended up with failure!";
 
     private HabitManagementService habitManagementService;
-    private HabitRepository habitRepository;
-    private Habit habit;
-    private HabitDto habitDto;
+    private Habit                  habit;
+    private HabitDTO               habitDto;
+
+    private static Method convertHabitToHabitDto;
+    private static Method convertHabitDtoToHabit;
+
+    @BeforeAll
+    static void setupBeforeAll() throws NoSuchMethodException {
+        convertHabitToHabitDto = HabitManagementService.class.getDeclaredMethod("convertHabitToHabitDto", Habit.class);
+        convertHabitToHabitDto.setAccessible(true);
+
+        convertHabitDtoToHabit = HabitManagementService.class.getDeclaredMethod("convertHabitDtoToHabit", HabitDTO.class);
+        convertHabitDtoToHabit.setAccessible(true);
+    }
 
     @BeforeEach
     void setup() {
@@ -36,11 +49,8 @@ public class HabitManagementServiceTest {
 
     @Test
     @DisplayName("Method convertHabitToHabitDto() should return the same habitDto with the same values as the Habit object contains")
-    void convertHabitToHabitDtoEqualityCheck() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Method convertHabitToHabitDto = HabitManagementService.class.getDeclaredMethod("convertHabitToHabitDto", Habit.class);
-        convertHabitToHabitDto.setAccessible(true);
-
-        HabitDto habitDto = (HabitDto) convertHabitToHabitDto.invoke(habitManagementService, habit);
+    void convertHabitToHabitDtoEqualityCheck() throws InvocationTargetException, IllegalAccessException {
+        HabitDTO habitDto = (HabitDTO) convertHabitToHabitDto.invoke(habitManagementService, habit);
 
         assertAll(
                 () -> assertEquals(habit.getName(), habitDto.name()),
@@ -53,10 +63,7 @@ public class HabitManagementServiceTest {
 
     @Test
     @DisplayName("Method convertHabitToHabitDTO() should throw ConversionException with suitable message")
-    void convertHabitToHabitDTOShouldThrowConversionException() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Method convertHabitToHabitDto = HabitManagementService.class.getDeclaredMethod("convertHabitToHabitDto", Habit.class);
-        convertHabitToHabitDto.setAccessible(true);
-
+    void convertHabitToHabitDTOShouldThrowConversionException() {
         Habit testHabit = null;
 
         Exception exception = assertThrows(InvocationTargetException.class, () ->  convertHabitToHabitDto.invoke(habitManagementService, testHabit));
@@ -66,11 +73,8 @@ public class HabitManagementServiceTest {
     }
 
     @Test
-    @DisplayName("Method convertHabitDtoToHabit() should return Habit object wiht the same values as the HabitDTO has")
-    void convertHabitDtoToHabitTest() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        Method convertHabitDtoToHabit = HabitManagementService.class.getDeclaredMethod("convertHabitDtoToHabit", HabitDTO.class);
-        convertHabitDtoToHabit.setAccessible(true);
-
+    @DisplayName("Method convertHabitDtoToHabit() should return Habit object with the same values as the HabitDTO has")
+    void convertHabitDtoToHabitTest() throws InvocationTargetException, IllegalAccessException {
         Habit habit = (Habit) convertHabitDtoToHabit.invoke(habitManagementService, habitDto);
 
         assertAll(
@@ -83,16 +87,12 @@ public class HabitManagementServiceTest {
     }
 
     @Test
-    @DisplayName("Method convertHabitDtoToHabit() should throw ConversionException with sutiable message")
-    void convertHabitDtoToHabitShouldThrowConversionException() throws NoSuchMethodException {
-        Method convertHabitDtoToHabit = HabitManagementService.class.getDeclaredMethod("convertHabitDtoToHabit", HabitDTO.class);
-        convertHabitDtoToHabit.setAccessible(true);
-
+    @DisplayName("Method convertHabitDtoToHabit() should throw ConversionException with suitable message")
+    void convertHabitDtoToHabitShouldThrowConversionException() {
         HabitDTO testHabit = null;
 
         Exception exception = assertThrows(InvocationTargetException.class, () ->  convertHabitDtoToHabit.invoke(habitManagementService, testHabit));
         assertInstanceOf(ConversionException.class, exception.getCause());
-
         assertEquals(CONVERSION_EXCEPTION_FROM_HABIT_DTO_TO_HABIT_MESSAGE,
                      exception.getCause().getMessage());
     }

@@ -6,10 +6,10 @@ import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.Objects;
 
-public record HabitDto(
+public record HabitDTO(
 
-    @NotNull(message = "Habit name cannot be null")
-    @Size(min = 1, max = 255, message = "Habit name must have 1 to 255 characters")
+    @NotBlank(message = "Habit name cannot be blank")
+    @Size(max = 255, message = "Habit name must have 1 to 255 characters")
     String name,
 
     @NotNull(message = "Habit frequency cannot be null")
@@ -24,11 +24,12 @@ public record HabitDto(
     Boolean reminder
 ) {
 
-    public HabitDto(String name,
+    public HabitDTO(String name,
                     HabitFrequency frequency,
                     LocalDate startDate,
                     LocalDate endDate,
-                    Boolean reminder) {
+                    Boolean reminder
+    ) {
 
         this.name = name;
         this.frequency = frequency;
@@ -40,7 +41,7 @@ public record HabitDto(
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        HabitDto habitDto = (HabitDto) o;
+        HabitDTO habitDto = (HabitDTO) o;
         return Objects.equals(name, habitDto.name);
     }
 

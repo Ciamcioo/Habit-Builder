@@ -1,10 +1,7 @@
 package io.github.ciamcioo.habit_builder.controller.exceptions;
 
-import io.github.ciamcioo.habit_builder.service.aspect.EnableMethodCallLogging;
 import io.github.ciamcioo.habit_builder.service.aspect.EnableMethodLogging;
 import io.github.ciamcioo.habit_builder.service.exceptions.*;
-import jakarta.validation.constraints.Email;
-import org.springdoc.core.service.GenericResponseService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -22,7 +19,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
-    public RestResponseEntityExceptionHandler(GenericResponseService genericResponseService) {
+    public RestResponseEntityExceptionHandler() {
     }
 
     @ExceptionHandler(value = {
@@ -31,7 +28,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         ConversionException.class
     })
     @EnableMethodLogging
-    protected ResponseEntity<Error> badRequestExceptionHandler(RuntimeException exception, WebRequest request) {
+    protected ResponseEntity<Error> badRequestExceptionHandler(RuntimeException exception) {
         return new ResponseEntity<>(
                 new Error(exception.getMessage()),
                 HttpStatus.BAD_REQUEST
@@ -43,7 +40,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
             UserNotFoundException.class
     })
     @EnableMethodLogging
-    protected ResponseEntity<Error> notFoundExceptionHandler(RuntimeException exception, WebRequest request) {
+    protected ResponseEntity<Error> notFoundExceptionHandler(RuntimeException exception) {
         return new ResponseEntity<>(
                 new Error(exception.getMessage()),
                 HttpStatus.NOT_FOUND
@@ -52,14 +49,13 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 
     @Override
     @EnableMethodLogging
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException exception, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException exception,  HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         Map<String, String> errors = new HashMap<>();
-        exception.getAllErrors().forEach(error -> {
-            errors.put(
-                    ((FieldError) error).getField(),
-                    error.getDefaultMessage()
-            );
-        });
+        exception.getAllErrors().forEach(error -> errors.put(
+                ((FieldError) error).getField(),
+                error.getDefaultMessage()
+        ));
 
         return new ResponseEntity<>(
             errors,

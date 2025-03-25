@@ -6,8 +6,4 @@ public class ConversionException extends RuntimeException{
     public ConversionException(String fromObject, String toObject) {
         super(String.format(CONVERSION_EXCEPTION_MESSAGE_FORMAT, fromObject, toObject));
     }
-
-    public ConversionException(String from, String to, Throwable throwable) {
-        super(String.format(CONVERSION_EXCEPTION_MESSAGE_FORMAT, from, to), throwable);
-    }
 }
