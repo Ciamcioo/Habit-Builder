@@ -66,17 +66,19 @@ public class UserManagementService implements UserService {
     @EnableMethodLogging
     public List<String> addUsers(List<UserDTO> userDTOs) {
         Set<UserDTO> uniqueUser = new HashSet<>(userDTOs);
+
         List<UserDTO> userDTOList = uniqueUser.stream()
-                .filter(userDTO -> userRepository.findUserByEmail(userDTO.email()).isEmpty())
-                .toList();
+                                              .filter(userDTO -> userRepository.findUserByEmail(userDTO.email()).isEmpty())
+                                              .toList();
+
         List<User> users = convertUserDTOListToUserList(userDTOList);
 
         List<String> usernames = new ArrayList<>();
         users.forEach(user -> {
-            userRepository.save(user);
             usernames.add(user.getUsername());
         });
-        userRepository.flush();
+
+        userRepository.saveAllAndFlush(users);
 
         return usernames;
     }

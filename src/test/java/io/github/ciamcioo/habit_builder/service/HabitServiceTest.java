@@ -35,7 +35,7 @@ public class HabitServiceTest {
         habitRepository = mock(HabitRepository.class);
         habitService = new HabitManagementService(habitRepository);
 
-        habit = builder.buildHabit();
+        habit = builder.withTestValues().buildHabit();
         habitDto = builder.withTestValues().buildHabitDto();
     }
 
@@ -45,6 +45,7 @@ public class HabitServiceTest {
         when(habitRepository.findAll()).thenReturn(new ArrayList<>());
 
         assertNotNull(habitService.getAllHabits());
+        verify(habitRepository).findAll();
     }
 
     @Test
@@ -53,6 +54,7 @@ public class HabitServiceTest {
         when(habitRepository.findAll()).thenReturn(new ArrayList<>());
 
         assertInstanceOf(List.class, habitService.getAllHabits());
+        verify(habitRepository).findAll();
     }
 
     @Test
@@ -61,6 +63,7 @@ public class HabitServiceTest {
         when(habitRepository.findAll()).thenReturn(new ArrayList<>());
 
         assertTrue(habitService.getAllHabits().isEmpty());
+        verify(habitRepository).findAll();
     }
 
 
@@ -75,6 +78,7 @@ public class HabitServiceTest {
         when(habitRepository.findAll()).thenReturn(habits);
 
         assertEquals(habits.size(), habitService.getAllHabits().size());
+        verify(habitRepository).findAll();
     }
 
     @Test
@@ -83,6 +87,7 @@ public class HabitServiceTest {
         when(habitRepository.findHabitByName(anyString())).thenReturn(Optional.of(new Habit()));
 
         assertInstanceOf(HabitDTO.class, habitService.getHabitByName(anyString()));
+        verify(habitRepository).findHabitByName(anyString());
     }
 
     @Test
@@ -94,6 +99,7 @@ public class HabitServiceTest {
 
         Exception exception = assertThrows(HabitNotFoundException.class, () -> habitService.getHabitByName(invalidName));
         assertEquals(HABIT_NOT_FOUND_EXCEPTION_MESSAGE, exception.getMessage());
+        verify(habitRepository).findHabitByName(invalidName);
     }
 
     @Test
@@ -106,6 +112,7 @@ public class HabitServiceTest {
     @DisplayName("The addHabit() method should return String which name matches the argument habitDto name")
     void addHabitShouldReturnNameOfHabitDto() {
         assertEquals(habitDto.name(), habitService.addHabit(habitDto));
+        verify(habitRepository).saveAndFlush(any(Habit.class));
     }
 
     @Test
@@ -114,6 +121,7 @@ public class HabitServiceTest {
         when(habitRepository.existsByName(habitDto.name())).thenReturn(true);
 
         assertThrows(HabitAlreadyExistsException.class, () -> habitService.addHabit(habitDto));
+        verify(habitRepository, never()).saveAndFlush(any(Habit.class));
     }
 
     @Test
@@ -126,6 +134,29 @@ public class HabitServiceTest {
     @DisplayName("The addHabits() method should return empty List if no argument is passed")
     void addHabitsShouldReturnEmptyListIfArgumentsDoNotMuch() {
         assertTrue(habitService.addHabits().isEmpty());
+    }
+
+    @Test
+    @DisplayName("The addHabits() method should filter out input array from duplications")
+    void addHabitsShouldFilterOutInputArray() {
+        HabitDTO habitDTO_1 = builder.withName("Test_habit_1").buildHabitDto();
+        HabitDTO habitDTO_2 = builder.withName("Test_habit_2").buildHabitDto();
+        HabitDTO habitDTO_3 = builder.withName("Test_habit_3").buildHabitDto();
+        HabitDTO duplicate  = builder.withName("Test_habit_3").buildHabitDto();
+
+        List<String> expectedResultList = new ArrayList<>();
+        expectedResultList.add(habitDTO_1.name());
+        expectedResultList.add(habitDTO_2.name());
+        expectedResultList.add(habitDTO_3.name());
+
+        when(habitRepository.existsByName(anyString())).thenReturn(false);
+
+        List<String> resultList = habitService.addHabits(habitDTO_1, habitDTO_2, habitDTO_3, duplicate);
+
+        for (String result : resultList) {
+            assertTrue(expectedResultList.contains(result));
+        }
+        verify(habitRepository).saveAllAndFlush(anyList());
     }
 
     @Test
@@ -144,47 +175,56 @@ public class HabitServiceTest {
         when(habitRepository.existsByName(anyString())).thenReturn(false);
         when(habitRepository.existsByName(habitDTO_4.name())).thenReturn(true);
 
-        assertEquals(expectedResultList, habitService.addHabits(habitDTO_1, habitDTO_2, habitDTO_3, habitDTO_4));
+        List<String> resultList = habitService.addHabits(habitDTO_1, habitDTO_2, habitDTO_3, habitDTO_4);
+
+        for (String result : resultList) {
+            assertTrue(expectedResultList.contains(result));
+        }
+        verify(habitRepository).saveAllAndFlush(anyList());
     }
 
     @Test
     @DisplayName("The updateHabit() method should throw an exception HabitNotFoundException with appropriate message if habit with provided name hasn't been found")
     void updateHabitMethodShouldThrowHabitNotFoundException() {
-        String habitName = TEST_HABIT_NAME;
+        String habitToUpdateName = TEST_HABIT_NAME;
 
-        when(habitRepository.findHabitByName(habitName)).thenReturn(Optional.empty());
+        when(habitRepository.findHabitByName(habitToUpdateName)).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(HabitNotFoundException.class, () -> habitService.updateHabit(habitName, any(HabitDTO.class)));
+        Exception exception = assertThrows(HabitNotFoundException.class, () -> habitService.updateHabit(habitToUpdateName, any(HabitDTO.class)));
         assertEquals(HABIT_NOT_FOUND_EXCEPTION_MESSAGE, exception.getMessage());
+        verify(habitRepository, never()).saveAndFlush(any(Habit.class));
     }
 
     @Test
     @DisplayName("The updateHabit() method should return HabitDTO of update record in database")
     void updateHabitMethodShouldReturnUpdatedRecord() {
-        String habitName = "test_habit";
-        HabitDTO updatedHabit = builder.withTestValues()
-                                        .withName("Updated test habit")
-                                        .withFrequency(HabitFrequency.MONTHLY)
-                                        .buildHabitDto();
+        String habitToUpdateName = TEST_HABIT_NAME;
+        HabitDTO updatedHabitDTO = builder.withTestValues()
+                                       .withName("Updated test habit")
+                                       .withFrequency(HabitFrequency.MONTHLY)
+                                       .buildHabitDto();
 
-        when(habitRepository.findHabitByName(habitName)).thenReturn(Optional.of(habit));
+        when(habitRepository.findHabitByName(habitToUpdateName)).thenReturn(Optional.of(habit));
 
-        assertEquals(updatedHabit, habitService.updateHabit(habitName, updatedHabit));
+        assertEquals(updatedHabitDTO, habitService.updateHabit(habitToUpdateName, updatedHabitDTO));
+        verify(habitRepository).saveAndFlush(habit);
     }
 
     @Test
     @DisplayName("The updateHabit() method should check if updated habit name doesn't already exists. " +
                  "If it exists method should throw HabitAlreadyExistsException with appropriate message.")
     void updateHabitMethodShouldThrowHabitAlreadyExistsException() {
-        String habitName = "test_habit";
+        String habitName = TEST_HABIT_NAME;
+        String updatedHabitName = "updatedHabitName";
         HabitDTO updatedHabit = builder.withTestValues()
-                                        .withName("already_used_name")
-                                        .buildHabitDto();
+                                       .withName(updatedHabitName)
+                                       .buildHabitDto();
 
-        when(habitRepository.findHabitByName("test_habit")).thenReturn(Optional.of(habit));
-        when(habitRepository.findHabitByName("already_used_name")).thenReturn(Optional.of(new Habit()));
+        when(habitRepository.findHabitByName(habitName)).thenReturn(Optional.of(new Habit()));
+        when(habitRepository.findHabitByName(updatedHabitName)).thenReturn(Optional.of(new Habit()));
 
         assertThrows(HabitAlreadyExistsException.class, () -> habitService.updateHabit(habitName, updatedHabit));
+        verify(habitRepository, never()).saveAndFlush(any(Habit.class));
     }
 
     @Test
@@ -196,15 +236,19 @@ public class HabitServiceTest {
 
         Exception exception = assertThrows(HabitNotFoundException.class, () -> habitService.deleteHabit(habitToDelete));
         assertEquals(HABIT_NOT_FOUND_EXCEPTION_MESSAGE, exception.getMessage());
+        verify(habitRepository, never()).delete(any(Habit.class));
     }
 
     @Test
     @DisplayName("The deleteHabit() method should finish without exceptions if the habit was removed")
     void deleteHabitMethodForCorrectHabitName() {
-        String habitToDelete = "habitToDelete";
+        Habit habitEntityToDelete = builder.buildHabit();
 
-        when(habitRepository.findHabitByName(habitToDelete)).thenReturn(Optional.of(new Habit()));
+        when(habitRepository.findHabitByName(habitEntityToDelete.getName())).thenReturn(Optional.of(habitEntityToDelete));
 
-        assertDoesNotThrow(() -> habitService.deleteHabit(habitToDelete));
+        assertDoesNotThrow(() -> habitService.deleteHabit(habitEntityToDelete.getName()));
+
+        verify(habitRepository).delete(habitEntityToDelete);
+        verify(habitRepository).flush();
     }
 }

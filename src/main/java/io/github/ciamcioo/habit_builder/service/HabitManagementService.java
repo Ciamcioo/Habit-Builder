@@ -10,9 +10,11 @@ import io.github.ciamcioo.habit_builder.service.exceptions.HabitAlreadyExistsExc
 import io.github.ciamcioo.habit_builder.service.exceptions.HabitNotFoundException;
 import io.github.ciamcioo.habit_builder.repository.HabitRepository;
 
+import org.antlr.v4.runtime.misc.OrderedHashSet;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class HabitManagementService implements HabitService{
@@ -73,12 +75,14 @@ public class HabitManagementService implements HabitService{
     @Override
     @EnableMethodLogging
     public List<String> addHabits(HabitDTO... habitDTOs) {
-        List<Habit> habitsToSave = Arrays.stream(habitDTOs)
-                                            .filter(habitDto ->
-                                                !habitRepository.existsByName(habitDto.name())
-                                            )
-                                            .map(this::convertHabitDtoToHabit)
-                                            .toList();
+        Set<HabitDTO> uniqueHabitDTOs = new HashSet<>(List.of(habitDTOs));
+
+        List<Habit> habitsToSave = uniqueHabitDTOs.stream()
+                                                  .filter(habitDto ->
+                                                      !habitRepository.existsByName(habitDto.name())
+                                                  )
+                                                  .map(this::convertHabitDtoToHabit)
+                                                  .toList();
 
         habitRepository.saveAllAndFlush(habitsToSave);
 
@@ -90,17 +94,14 @@ public class HabitManagementService implements HabitService{
     @EnableExceptionLogging
     public HabitDTO updateHabit(String habitName, HabitDTO updatedHabit) {
 
-        Optional<Habit> recordToUpdate = habitRepository.findHabitByName(habitName);
-        if (recordToUpdate.isEmpty()) {
-            throw new HabitNotFoundException(String.format(HABIT_NOT_FOUND, habitName));
-        }
+        Habit record = habitRepository.findHabitByName(habitName)
+                                      .orElseThrow(() -> new HabitNotFoundException(String.format(HABIT_NOT_FOUND, habitName)));
 
         Optional<Habit> recordWithUpdateName = habitRepository.findHabitByName(updatedHabit.name());
         if (recordWithUpdateName.isPresent()) {
             throw new HabitAlreadyExistsException(String.format(HABIT_ALREADY_EXIST, updatedHabit.name()));
         }
 
-        Habit record = recordToUpdate.get();
         record.setName(updatedHabit.name());
         record.setFrequency(updatedHabit.frequency());
         record.setStartDate(updatedHabit.startDate());
@@ -116,13 +117,11 @@ public class HabitManagementService implements HabitService{
     @EnableMethodCallLogging
     @EnableExceptionLogging
     public void deleteHabit(String habitName) {
-        Optional<Habit> habit = habitRepository.findHabitByName(habitName);
+        Habit habit = habitRepository.findHabitByName(habitName)
+                                     .orElseThrow(() -> new HabitNotFoundException(String.format(HABIT_NOT_FOUND, habitName)));
 
-        if (habit.isEmpty()) {
-            throw new HabitNotFoundException(String.format(HABIT_NOT_FOUND, habitName));
-        }
-
-        habitRepository.delete(habit.get());
+        habitRepository.delete(habit);
+        habitRepository.flush();
     }
 
     private HabitDTO convertHabitToHabitDto(Habit habit) throws ConversionException {
@@ -150,8 +149,4 @@ public class HabitManagementService implements HabitService{
             throw new ConversionException(HabitDTO.class.getSimpleName(), Habit.class.getSimpleName());
         }
     }
-
-
-
-
 }

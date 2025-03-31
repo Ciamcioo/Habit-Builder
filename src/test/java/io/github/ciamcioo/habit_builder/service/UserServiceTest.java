@@ -12,14 +12,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 public class UserServiceTest {
@@ -57,6 +57,7 @@ public class UserServiceTest {
       when(userRepository.findAll()).thenReturn(List.of());
 
       assertTrue(userService.getAllUsers().isEmpty());
+      verify(userRepository).findAll();
    }
 
    @Test
@@ -70,6 +71,7 @@ public class UserServiceTest {
       when(userRepository.findAll()).thenReturn(users);
 
        assertFalse(userService.getAllUsers().isEmpty());
+       verify(userRepository).findAll();
    }
 
    // GET SINGLE USER TEST
@@ -93,6 +95,7 @@ public class UserServiceTest {
       UserDTO resultUser = userService.getUser(TEST_EMAIL_ADDRESS);
 
       assertEquals(TEST_EMAIL_ADDRESS, resultUser.email());
+      verify(userRepository).findUserByEmail(TEST_EMAIL_ADDRESS);
    }
 
    @Test
@@ -104,6 +107,7 @@ public class UserServiceTest {
       when(userRepository.findUserByEmail(testUserDTO.email())).thenReturn(Optional.of(testUser));
 
       assertEquals(testUserDTO, userService.getUser(testUserDTO.email()));
+      verify(userRepository).findUserByEmail(testUser.getEmail());
    }
 
    @Test
@@ -114,6 +118,7 @@ public class UserServiceTest {
       when(userRepository.findUserByEmail(testEmail)).thenReturn(Optional.empty());
 
       assertThrows(UserNotFoundException.class, () -> userService.getUser(testEmail));
+      verify(userRepository).findUserByEmail(testEmail);
    }
 
    // ADD SINGLE USER TEST
@@ -131,18 +136,22 @@ public class UserServiceTest {
    @DisplayName("Method addUser() should return the name of created user")
    void addUserShouldReturnTheGetUsernameOfCreatedUser() {
       UserDTO userDTO = userBuilder.buildUserDTO();
+      User userEntity = userBuilder.withId(null).buildUser();
 
       assertEquals(userDTO.username(), userService.addUser(userDTO));
+      verify(userRepository).saveAndFlush(userEntity);
    }
 
    @Test
    @DisplayName("Method addUser() should throw user already exists exception if user with specified email already exists.")
    void addUserShouldThrowUserAlreadyExistsException() {
       UserDTO userDTO = userBuilder.buildUserDTO();
+      User userEntity = userBuilder.buildUser();
 
-      when(userRepository.findUserByEmail(userDTO.email())).thenReturn(Optional.of(new User()));
+      when(userRepository.findUserByEmail(userDTO.email())).thenReturn(Optional.of(userEntity));
 
       assertThrows(UserAlreadyExistsException.class, () -> userService.addUser(userDTO));
+      verify(userRepository, never()).saveAndFlush(userEntity);
    }
 
    // ADD MULTIPLE USERS AT ONCE TEST
@@ -164,6 +173,7 @@ public class UserServiceTest {
       );
 
       assertEquals(userDTOs.size(), userService.addUsers(userDTOs).size());
+      verify(userRepository).saveAllAndFlush(anyList());
    }
 
    @Test
@@ -181,19 +191,27 @@ public class UserServiceTest {
       for (int i = 0; i < userDTOs.size(); i++) {
          assertEquals(userDTOs.get(i).username(), usernames.get(i));
       }
+
+      verify(userRepository).saveAllAndFlush(anyList());
    }
 
   @Test
   @DisplayName("Method addUsers() should add only unique users from argument List")
   void addUsersShouldOnlyAddUniqueUsersToDatabase() {
+      int expectedSize = 1;
       List<UserDTO> notUniqueUserDTOs = List.of(
             userBuilder.withEmail(TEST_EMAIL_ADDRESS).buildUserDTO(),
             userBuilder.withEmail(TEST_EMAIL_ADDRESS).buildUserDTO()
       );
 
       when(habitRepository.findHabitByName(TEST_EMAIL_ADDRESS)).thenReturn(Optional.empty());
+     ArgumentCaptor<List<User>> captor = ArgumentCaptor.forClass(List.class);
 
-      assertEquals(1, userService.addUsers(notUniqueUserDTOs).size());
+      assertEquals(expectedSize, userService.addUsers(notUniqueUserDTOs).size());
+      verify(userRepository).saveAllAndFlush(captor.capture());
+
+      List<User> userSaveList = captor.getValue();
+      assertEquals(expectedSize, userSaveList.size());
   }
 
    // UPDATE USER TESTS
@@ -209,11 +227,12 @@ public class UserServiceTest {
    @Test
    @DisplayName("Method updateUser() should return UserDTO that matches updated object")
    void updateUserShouldReturnUserDTOObjectWhichWillMuchUpdateObject() {
-      UserDTO user = userBuilder.buildUserDTO();
+      UserDTO userDTO = userBuilder.buildUserDTO();
+      User userEntity = userBuilder.buildUser();
 
-      when(userRepository.findUserByEmail(TEST_EMAIL_ADDRESS)).thenReturn(Optional.of(new User()));
+      when(userRepository.findUserByEmail(TEST_EMAIL_ADDRESS)).thenReturn(Optional.of(userEntity));
 
-      assertEquals(user, userService.updateUser(TEST_EMAIL_ADDRESS, user));
+      assertEquals(userDTO, userService.updateUser(TEST_EMAIL_ADDRESS, userDTO));
    }
 
    @Test
@@ -237,7 +256,7 @@ public class UserServiceTest {
       when(userRepository.findUserByEmail(TEST_EMAIL_ADDRESS)).thenReturn(Optional.empty());
 
       assertThrows(UserNotFoundException.class, () -> userService.updateUser(TEST_EMAIL_ADDRESS, user));
-
+      verify(userRepository, never()).saveAndFlush(any(User.class));
    }
 
    // DELETE USER TEST
@@ -248,10 +267,20 @@ public class UserServiceTest {
       when(userRepository.findUserByEmail(TEST_EMAIL_ADDRESS)).thenReturn(Optional.empty());
 
       assertThrows(UserNotFoundException.class, () -> userService.deleteUser(TEST_EMAIL_ADDRESS));
+      verify(userRepository, never()).delete(any(User.class));
+      verify(userRepository, never()).flush();
    }
 
+   @Test
+   @DisplayName("Method deleteUser() should call delete method and flush method on the userRepository interface")
+   void deleterUserShouldCallUserRepositoryDeleteAndFlushMethod() {
+      User user = userBuilder.withTestValues().buildUser();
 
+      when(userRepository.findUserByEmail(TEST_EMAIL_ADDRESS)).thenReturn(Optional.of(user));
 
+      userService.deleteUser(TEST_EMAIL_ADDRESS);
 
-
+      verify(userRepository).delete(user);
+      verify(userRepository).flush();
+   }
 }
