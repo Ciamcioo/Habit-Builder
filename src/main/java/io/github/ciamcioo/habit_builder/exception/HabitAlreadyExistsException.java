@@ -1,4 +1,4 @@
-package io.github.ciamcioo.habit_builder.service.exceptions;
+package io.github.ciamcioo.habit_builder.exception;
 
 public class HabitAlreadyExistsException extends RuntimeException {
     public static final String DEF_MESSAGE = "Such a habit already exists in the habit set";

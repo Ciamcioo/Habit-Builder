@@ -3,7 +3,7 @@ package io.github.ciamcioo.habit_builder.service;
 import io.github.ciamcioo.habit_builder.model.dto.UserDTO;
 import io.github.ciamcioo.habit_builder.model.entity.User;
 import io.github.ciamcioo.habit_builder.repository.UserRepository;
-import io.github.ciamcioo.habit_builder.service.exceptions.ConversionException;
+import io.github.ciamcioo.habit_builder.exception.ConversionException;
 import io.github.ciamcioo.habit_builder.util.UserBuilder;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;

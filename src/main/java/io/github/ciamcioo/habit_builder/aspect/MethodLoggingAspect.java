@@ -1,4 +1,4 @@
-package io.github.ciamcioo.habit_builder.controller.aspect;
+package io.github.ciamcioo.habit_builder.aspect;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.*;
@@ -13,8 +13,8 @@ public class MethodLoggingAspect {
     private static final Logger log = LoggerFactory.getLogger(MethodLoggingAspect.class);
 
 
-    @Before("@annotation(io.github.ciamcioo.habit_builder.service.aspect.EnableMethodCallLogging) || " +
-            "@annotation(io.github.ciamcioo.habit_builder.service.aspect.EnableMethodLogging)")
+    @Before("@annotation(io.github.ciamcioo.habit_builder.aspect.annotation.EnableMethodCallLogging) || " +
+            "@annotation(io.github.ciamcioo.habit_builder.aspect.annotation.EnableMethodLogging)")
     public void logMethodCall(JoinPoint joinPoint) {
         log.info("Event: {}, Method: {}, Arguments: {}",
                 joinPoint.getKind(),
@@ -23,8 +23,8 @@ public class MethodLoggingAspect {
         );
     }
 
-    @AfterReturning(value = "@annotation(io.github.ciamcioo.habit_builder.service.aspect.EnableReturnLogging) ||" +
-                    "@annotation(io.github.ciamcioo.habit_builder.service.aspect.EnableMethodLogging)",
+    @AfterReturning(value = "@annotation(io.github.ciamcioo.habit_builder.aspect.annotation.EnableReturnLogging) ||" +
+                    "@annotation(io.github.ciamcioo.habit_builder.aspect.annotation.EnableMethodLogging)",
                     returning="returnValue")
     public void logMethodReturn(JoinPoint joinPoint, Object returnValue) {
         log.info("Event: {}, Method: {}, Returned object hashcode: {}",
@@ -35,7 +35,7 @@ public class MethodLoggingAspect {
 
     }
 
-    @AfterThrowing(value = "@annotation(io.github.ciamcioo.habit_builder.service.aspect.EnableExceptionLogging)", throwing = "exception")
+    @AfterThrowing(value = "@annotation(io.github.ciamcioo.habit_builder.aspect.annotation.EnableExceptionLogging)", throwing = "exception")
     public void logException(JoinPoint joinPoint, Throwable exception) {
         log.warn("Event: {}, Method: {}, Exception type: {}, Exception message: {}",
                  "Exception thrown",

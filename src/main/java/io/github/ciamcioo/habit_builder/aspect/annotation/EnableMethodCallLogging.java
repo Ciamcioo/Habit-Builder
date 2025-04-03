@@ -1,13 +1,11 @@
-package io.github.ciamcioo.habit_builder.service.aspect;
+package io.github.ciamcioo.habit_builder.aspect.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.METHOD)
+@Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@EnableReturnLogging
-@EnableMethodCallLogging
-public @interface EnableMethodLogging {
+public @interface EnableMethodCallLogging {
 }

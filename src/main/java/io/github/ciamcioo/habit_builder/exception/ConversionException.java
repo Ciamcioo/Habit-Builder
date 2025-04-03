@@ -1,4 +1,4 @@
-package io.github.ciamcioo.habit_builder.service.exceptions;
+package io.github.ciamcioo.habit_builder.exception;
 
 public class ConversionException extends RuntimeException{
     public static final String CONVERSION_EXCEPTION_MESSAGE_FORMAT = "Conversion of %s to %s ended up with failure!";

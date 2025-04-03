@@ -4,8 +4,8 @@ import io.github.ciamcioo.habit_builder.model.dto.UserDTO;
 import io.github.ciamcioo.habit_builder.model.entity.User;
 import io.github.ciamcioo.habit_builder.repository.HabitRepository;
 import io.github.ciamcioo.habit_builder.repository.UserRepository;
-import io.github.ciamcioo.habit_builder.service.exceptions.UserAlreadyExistsException;
-import io.github.ciamcioo.habit_builder.service.exceptions.UserNotFoundException;
+import io.github.ciamcioo.habit_builder.exception.UserAlreadyExistsException;
+import io.github.ciamcioo.habit_builder.exception.UserNotFoundException;
 import io.github.ciamcioo.habit_builder.util.UserBuilder;
 
 import org.junit.jupiter.api.BeforeEach;

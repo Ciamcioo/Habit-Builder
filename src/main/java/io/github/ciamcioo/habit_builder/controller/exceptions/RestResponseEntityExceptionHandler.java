@@ -1,7 +1,7 @@
 package io.github.ciamcioo.habit_builder.controller.exceptions;
 
-import io.github.ciamcioo.habit_builder.service.aspect.EnableMethodLogging;
-import io.github.ciamcioo.habit_builder.service.exceptions.*;
+import io.github.ciamcioo.habit_builder.aspect.annotation.EnableMethodLogging;
+import io.github.ciamcioo.habit_builder.exception.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;

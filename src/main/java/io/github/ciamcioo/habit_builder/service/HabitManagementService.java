@@ -2,19 +2,17 @@ package io.github.ciamcioo.habit_builder.service;
 
 import io.github.ciamcioo.habit_builder.model.dto.HabitDTO;
 import io.github.ciamcioo.habit_builder.model.entity.Habit;
-import io.github.ciamcioo.habit_builder.service.aspect.EnableExceptionLogging;
-import io.github.ciamcioo.habit_builder.service.aspect.EnableMethodCallLogging;
-import io.github.ciamcioo.habit_builder.service.aspect.EnableMethodLogging;
-import io.github.ciamcioo.habit_builder.service.exceptions.ConversionException;
-import io.github.ciamcioo.habit_builder.service.exceptions.HabitAlreadyExistsException;
-import io.github.ciamcioo.habit_builder.service.exceptions.HabitNotFoundException;
+import io.github.ciamcioo.habit_builder.aspect.annotation.EnableExceptionLogging;
+import io.github.ciamcioo.habit_builder.aspect.annotation.EnableMethodCallLogging;
+import io.github.ciamcioo.habit_builder.aspect.annotation.EnableMethodLogging;
+import io.github.ciamcioo.habit_builder.exception.ConversionException;
+import io.github.ciamcioo.habit_builder.exception.HabitAlreadyExistsException;
+import io.github.ciamcioo.habit_builder.exception.HabitNotFoundException;
 import io.github.ciamcioo.habit_builder.repository.HabitRepository;
 
-import org.antlr.v4.runtime.misc.OrderedHashSet;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class HabitManagementService implements HabitService{

@@ -2,7 +2,7 @@ package io.github.ciamcioo.habit_builder.controller;
 
 import io.github.ciamcioo.habit_builder.model.dto.HabitDTO;
 import io.github.ciamcioo.habit_builder.service.HabitService;
-import io.github.ciamcioo.habit_builder.service.aspect.EnableMethodLogging;
+import io.github.ciamcioo.habit_builder.aspect.annotation.EnableMethodLogging;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

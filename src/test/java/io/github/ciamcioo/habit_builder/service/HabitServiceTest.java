@@ -4,8 +4,8 @@ import io.github.ciamcioo.habit_builder.model.dto.HabitDTO;
 import io.github.ciamcioo.habit_builder.util.HabitBuilder;
 import io.github.ciamcioo.habit_builder.model.commons.HabitFrequency;
 import io.github.ciamcioo.habit_builder.model.entity.Habit;
-import io.github.ciamcioo.habit_builder.service.exceptions.HabitAlreadyExistsException;
-import io.github.ciamcioo.habit_builder.service.exceptions.HabitNotFoundException;
+import io.github.ciamcioo.habit_builder.exception.HabitAlreadyExistsException;
+import io.github.ciamcioo.habit_builder.exception.HabitNotFoundException;
 import io.github.ciamcioo.habit_builder.repository.HabitRepository;
 
 import org.junit.jupiter.api.BeforeEach;
