@@ -9,7 +9,7 @@ import java.util.Objects;
 public record HabitDTO(
 
     @NotBlank(message = "Habit name cannot be blank")
-    @Size(max = 255, message = "Habit name must have 1 to 255 characters")
+    @Size(min = 3, max = 255, message = "Habit name must have 3 to 255 characters")
     String name,
 
     @NotNull(message = "Habit frequency cannot be null")
@@ -21,6 +21,7 @@ public record HabitDTO(
 
     @Future(message = "End date of habit must be placed in the future")
     LocalDate endDate,
+
     Boolean reminder
 ) {
 
@@ -41,13 +42,24 @@ public record HabitDTO(
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        HabitDTO habitDto = (HabitDTO) o;
-        return Objects.equals(name, habitDto.name);
+        HabitDTO habitDTO = (HabitDTO) o;
+        return Objects.equals(name, habitDTO.name) && Objects.equals(reminder, habitDTO.reminder) && Objects.equals(endDate, habitDTO.endDate) && Objects.equals(startDate, habitDTO.startDate) && frequency == habitDTO.frequency;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(name);
+        return Objects.hash(name, frequency, startDate, endDate, reminder);
+    }
+
+    @Override
+    public String toString() {
+        return "HabitDTO{" +
+                "name='" + name + '\'' +
+                ", frequency=" + frequency +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", reminder=" + reminder +
+                '}';
     }
 }
 

@@ -32,21 +32,16 @@ public record UserDTO(
                 this.age = age != null ? age : 0;
         }
 
-
         @Override
         public boolean equals(Object o) {
                 if (o == null || getClass() != o.getClass()) return false;
                 UserDTO userDTO = (UserDTO) o;
-                return  Objects.equals(email, userDTO.email) &&
-                        Objects.equals(username, userDTO.username) &&
-                        Objects.equals(lastName, userDTO.lastName) &&
-                        Objects.equals(firstName, userDTO.firstName) &&
-                        Objects.equals(age, userDTO.age);
+                return Objects.equals(email, userDTO.email);
         }
 
         @Override
         public int hashCode() {
-                return Objects.hash(email, username, firstName, lastName, age);
+                return Objects.hashCode(email);
         }
 
         @Override

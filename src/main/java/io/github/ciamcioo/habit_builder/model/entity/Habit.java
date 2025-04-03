@@ -4,6 +4,7 @@ import io.github.ciamcioo.habit_builder.model.commons.HabitFrequency;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -66,10 +67,6 @@ public class Habit {
         return uuid;
     }
 
-    public void setUUID(UUID uuid) {
-        this.uuid = uuid;
-    }
-
     public String getName() {
         return name;
     }
@@ -108,6 +105,18 @@ public class Habit {
 
     public void setReminder(Boolean reminder) {
         this.reminder = reminder;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Habit habit = (Habit) o;
+        return Objects.equals(uuid, habit.uuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(uuid);
     }
 
     @Override
