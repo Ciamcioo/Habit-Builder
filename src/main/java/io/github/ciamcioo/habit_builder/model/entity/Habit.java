@@ -35,13 +35,6 @@ public class Habit {
     @JoinColumn(name = "user_id")
     private User user;
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
 
     public Habit() {
     }
@@ -63,8 +56,12 @@ public class Habit {
         this.reminder = reminder;
     }
 
-    public UUID getUUID() {
+    public UUID getUuid() {
         return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
     }
 
     public String getName() {
@@ -107,6 +104,14 @@ public class Habit {
         this.reminder = reminder;
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -122,12 +127,13 @@ public class Habit {
     @Override
     public String toString() {
         return "Habit{" +
-                "id=" + uuid +
+                "uuid=" + uuid +
                 ", name='" + name + '\'' +
                 ", frequency=" + frequency +
                 ", startDate=" + startDate +
                 ", endDate=" + endDate +
                 ", reminder=" + reminder +
+                ", user=" + user +
                 '}';
     }
 

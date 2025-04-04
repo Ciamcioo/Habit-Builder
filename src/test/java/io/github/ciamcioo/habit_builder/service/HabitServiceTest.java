@@ -1,6 +1,7 @@
 package io.github.ciamcioo.habit_builder.service;
 
 import io.github.ciamcioo.habit_builder.model.dto.HabitDTO;
+import io.github.ciamcioo.habit_builder.service.mapper.HabitMapper;
 import io.github.ciamcioo.habit_builder.util.HabitBuilder;
 import io.github.ciamcioo.habit_builder.model.commons.HabitFrequency;
 import io.github.ciamcioo.habit_builder.model.entity.Habit;
@@ -23,17 +24,23 @@ public class HabitServiceTest {
     public static final String HABIT_NOT_FOUND_EXCEPTION_MESSAGE = "Habit with name = testHabit not found";
     public static final String TEST_HABIT_NAME                   = "testHabit";
 
+    // TESTED SERVICE
     HabitService    habitService;
-    HabitRepository habitRepository;
 
+    // MOCK SERVICE
+    HabitRepository habitRepository;
+    HabitMapper     habitMapper;
+
+    // HELPER OBJECTS
+    HabitBuilder    builder = HabitBuilder.getInstance();
     HabitDTO        habitDto;
     Habit           habit;
-    HabitBuilder    builder = HabitBuilder.getInstance();
 
     @BeforeEach
     void setup() {
         habitRepository = mock(HabitRepository.class);
-        habitService = new HabitManagementService(habitRepository);
+        habitMapper = mock(HabitMapper.class);
+        habitService = new HabitManagementService(habitRepository, habitMapper);
 
         habit = builder.withTestValues().buildHabit();
         habitDto = builder.withTestValues().buildHabitDto();
@@ -84,7 +91,8 @@ public class HabitServiceTest {
     @Test
     @DisplayName("Method getHabitByName() should return HabitDTO object")
     void getHabitByNameShouldReturnHabitInstance() {
-        when(habitRepository.findHabitByName(anyString())).thenReturn(Optional.of(new Habit()));
+        when(habitMapper.toDTO(habit)).thenReturn(habitDto);
+        when(habitRepository.findHabitByName(anyString())).thenReturn(Optional.of(habit));
 
         assertInstanceOf(HabitDTO.class, habitService.getHabitByName(anyString()));
         verify(habitRepository).findHabitByName(anyString());
@@ -111,6 +119,8 @@ public class HabitServiceTest {
     @Test
     @DisplayName("The addHabit() method should return String which name matches the argument habitDto name")
     void addHabitShouldReturnNameOfHabitDto() {
+        when(habitMapper.toEntity(habitDto)).thenReturn(habit);
+
         assertEquals(habitDto.name(), habitService.addHabit(habitDto));
         verify(habitRepository).saveAndFlush(any(Habit.class));
     }
@@ -127,6 +137,8 @@ public class HabitServiceTest {
     @Test
     @DisplayName("The addHabits() method shouldn't return null")
     void addHabitsShouldNotReturnNull() {
+        when(habitMapper.toEntity(habitDto)).thenReturn(habit);
+
         assertNotNull(habitService.addHabits(habitDto));
     }
 
@@ -140,15 +152,25 @@ public class HabitServiceTest {
     @DisplayName("The addHabits() method should filter out input array from duplications")
     void addHabitsShouldFilterOutInputArray() {
         HabitDTO habitDTO_1 = builder.withName("Test_habit_1").buildHabitDto();
+        Habit habitEntity_1 = builder.buildHabit();
+
         HabitDTO habitDTO_2 = builder.withName("Test_habit_2").buildHabitDto();
+        Habit habitEntity_2 = builder.buildHabit();
+
         HabitDTO habitDTO_3 = builder.withName("Test_habit_3").buildHabitDto();
+        Habit habitEntity_3 = builder.buildHabit();
+
         HabitDTO duplicate  = builder.withName("Test_habit_3").buildHabitDto();
+
 
         List<String> expectedResultList = new ArrayList<>();
         expectedResultList.add(habitDTO_1.name());
         expectedResultList.add(habitDTO_2.name());
         expectedResultList.add(habitDTO_3.name());
 
+        when(habitMapper.toEntity(habitDTO_1)).thenReturn(habitEntity_1);
+        when(habitMapper.toEntity(habitDTO_2)).thenReturn(habitEntity_2);
+        when(habitMapper.toEntity(habitDTO_3)).thenReturn(habitEntity_3);
         when(habitRepository.existsByName(anyString())).thenReturn(false);
 
         List<String> resultList = habitService.addHabits(habitDTO_1, habitDTO_2, habitDTO_3, duplicate);
@@ -163,8 +185,11 @@ public class HabitServiceTest {
     @DisplayName("The addHabits() method should return names of added habits")
     void addHabitReturnsListOfAddedHabitsNames() {
         HabitDTO habitDTO_1 = builder.withName("Test_habit_1").buildHabitDto();
+        Habit habitEntity_1 = builder.buildHabit();
         HabitDTO habitDTO_2 = builder.withName("Test_habit_2").buildHabitDto();
+        Habit habitEntity_2 = builder.buildHabit();
         HabitDTO habitDTO_3 = builder.withName("Test_habit_3").buildHabitDto();
+        Habit habitEntity_3 = builder.buildHabit();
         HabitDTO habitDTO_4 = builder.withName("Test_habit_4").buildHabitDto();
 
         List<String> expectedResultList = new ArrayList<>();
@@ -174,6 +199,9 @@ public class HabitServiceTest {
 
         when(habitRepository.existsByName(anyString())).thenReturn(false);
         when(habitRepository.existsByName(habitDTO_4.name())).thenReturn(true);
+        when(habitMapper.toEntity(habitDTO_1)).thenReturn(habitEntity_1);
+        when(habitMapper.toEntity(habitDTO_2)).thenReturn(habitEntity_2);
+        when(habitMapper.toEntity(habitDTO_3)).thenReturn(habitEntity_3);
 
         List<String> resultList = habitService.addHabits(habitDTO_1, habitDTO_2, habitDTO_3, habitDTO_4);
 

@@ -59,6 +59,10 @@ public class User {
         return id;
     }
 
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
     public String getEmail() {
         return email;
     }
@@ -99,6 +103,13 @@ public class User {
         this.age = age;
     }
 
+    public List<Habit> getUserHabits() {
+        return userHabits;
+    }
+
+    public void setUserHabits(List<Habit> userHabits) {
+        this.userHabits = userHabits;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -121,6 +132,7 @@ public class User {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", age=" + age +
+                ", userHabits=" + userHabits +
                 '}';
     }
 }

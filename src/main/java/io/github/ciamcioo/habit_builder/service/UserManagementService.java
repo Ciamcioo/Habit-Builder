@@ -6,10 +6,10 @@ import io.github.ciamcioo.habit_builder.repository.UserRepository;
 import io.github.ciamcioo.habit_builder.aspect.annotation.EnableExceptionLogging;
 import io.github.ciamcioo.habit_builder.aspect.annotation.EnableMethodCallLogging;
 import io.github.ciamcioo.habit_builder.aspect.annotation.EnableMethodLogging;
-import io.github.ciamcioo.habit_builder.exception.ConversionException;
 import io.github.ciamcioo.habit_builder.exception.UserAlreadyExistsException;
 import io.github.ciamcioo.habit_builder.exception.UserNotFoundException;
 
+import io.github.ciamcioo.habit_builder.service.mapper.UserMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,17 +25,22 @@ public class UserManagementService implements UserService {
     private static final String USER_ALREADY_EXISTS = "User with email: %s already exists";
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     @Autowired
-    public UserManagementService(UserRepository userRepository) {
+    public UserManagementService(UserRepository userRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
 
     @Override
     @EnableMethodLogging
     public List<UserDTO> getAllUsers() {
-        List<User> users =  userRepository.findAll();
-        return convertUserListToUserDTOList(users);
+        List<User> persistedUsers = userRepository.findAll();
+
+        return persistedUsers.stream()
+                             .map(userMapper::toDTO)
+                             .toList();
     }
 
     @Override
@@ -46,7 +51,8 @@ public class UserManagementService implements UserService {
                                            .orElseThrow(
                                                    () -> new UserNotFoundException(String.format(USER_NOT_FOUND, email))
                                            );
-        return convertUserToUserDTO(persistedUser);
+
+        return userMapper.toDTO(persistedUser);
     }
 
     @Override
@@ -56,7 +62,7 @@ public class UserManagementService implements UserService {
             throw new UserAlreadyExistsException(String.format(USER_ALREADY_EXISTS, userDTO.email()));
         }
 
-        User user = convertUserDTOToUser(userDTO);
+        User user = userMapper.toEntity(userDTO);
         userRepository.saveAndFlush(user);
 
         return user.getUsername();
@@ -67,20 +73,16 @@ public class UserManagementService implements UserService {
     public List<String> addUsers(List<UserDTO> userDTOs) {
         Set<UserDTO> uniqueUser = new HashSet<>(userDTOs);
 
-        List<UserDTO> userDTOList = uniqueUser.stream()
+        List<User> usersToPersist = uniqueUser.stream()
                                               .filter(userDTO -> userRepository.findUserByEmail(userDTO.email()).isEmpty())
+                                              .map(userMapper::toEntity)
                                               .toList();
 
-        List<User> users = convertUserDTOListToUserList(userDTOList);
+        userRepository.saveAllAndFlush(usersToPersist);
 
-        List<String> usernames = new ArrayList<>();
-        users.forEach(user -> {
-            usernames.add(user.getUsername());
-        });
-
-        userRepository.saveAllAndFlush(users);
-
-        return usernames;
+        return usersToPersist.stream()
+                             .map(User::getUsername)
+                             .toList();
     }
 
     @Override
@@ -102,7 +104,7 @@ public class UserManagementService implements UserService {
         userToUpdate.setLastName(updatedUser.lastName());
         userToUpdate.setAge(updatedUser.age());
 
-        return convertUserToUserDTO(userToUpdate);
+        return userMapper.toDTO(userToUpdate);
     }
 
     @Override
@@ -117,56 +119,4 @@ public class UserManagementService implements UserService {
         userRepository.delete(userToDelete);
         userRepository.flush();
     }
-
-
-
-    private List<UserDTO> convertUserListToUserDTOList(List<User> users) {
-        List<UserDTO> userDTOs = new ArrayList<>();
-
-        users.forEach(user -> userDTOs.add(convertUserToUserDTO(user)));
-
-        return Collections.unmodifiableList(userDTOs);
-
-    }
-
-    private UserDTO convertUserToUserDTO(User user) {
-        try {
-            return new UserDTO(
-                    user.getEmail(),
-                    user.getUsername(),
-                    user.getFirstName(),
-                    user.getLastName(),
-                    user.getAge()
-            );
-        } catch(RuntimeException e) {
-            throw new ConversionException(User.class.getSimpleName(), UserDTO.class.getSimpleName());
-        }
-    }
-
-
-    private List<User> convertUserDTOListToUserList(List<UserDTO> userDTOList) {
-        List<User> userList = new ArrayList<>();
-        userDTOList.forEach(userDTO ->
-                userList.add(
-                        convertUserDTOToUser(userDTO)
-                )
-        );
-        return Collections.unmodifiableList(userList);
-    }
-
-    private User convertUserDTOToUser(UserDTO userDTO) {
-        try {
-            return new User(
-                    userDTO.email(),
-                    userDTO.username(),
-                    userDTO.firstName(),
-                    userDTO.lastName(),
-                    userDTO.age()
-            );
-        } catch(RuntimeException e) {
-            throw new ConversionException(UserDTO.class.getSimpleName(), User.class.getSimpleName());
-        }
-    }
-
-
 }

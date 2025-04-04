@@ -5,11 +5,12 @@ import io.github.ciamcioo.habit_builder.model.entity.Habit;
 import io.github.ciamcioo.habit_builder.aspect.annotation.EnableExceptionLogging;
 import io.github.ciamcioo.habit_builder.aspect.annotation.EnableMethodCallLogging;
 import io.github.ciamcioo.habit_builder.aspect.annotation.EnableMethodLogging;
-import io.github.ciamcioo.habit_builder.exception.ConversionException;
 import io.github.ciamcioo.habit_builder.exception.HabitAlreadyExistsException;
 import io.github.ciamcioo.habit_builder.exception.HabitNotFoundException;
 import io.github.ciamcioo.habit_builder.repository.HabitRepository;
 
+import io.github.ciamcioo.habit_builder.service.mapper.HabitMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -20,22 +21,22 @@ public class HabitManagementService implements HabitService{
     private static final String HABIT_ALREADY_EXIST = "Habit with name = %s already exists in database";
 
     private final HabitRepository habitRepository;
+    private final HabitMapper habitMapper;
 
-    public HabitManagementService(HabitRepository habitRepository) {
+    @Autowired
+    public HabitManagementService(HabitRepository habitRepository, HabitMapper habitMapper) {
         this.habitRepository = habitRepository;
+        this.habitMapper = habitMapper;
     }
 
     @Override
     @EnableMethodLogging
     public List<HabitDTO> getAllHabits() {
-        List<HabitDTO> habits = new ArrayList<>();
-        habitRepository.findAll()
-                        .forEach(habit -> {
-                            HabitDTO habitDto = convertHabitToHabitDto(habit);
-                            habits.add(habitDto);
-                        });
+        List<Habit> persistedHabits = habitRepository.findAll();
 
-        return Collections.unmodifiableList(habits);
+        return persistedHabits.stream()
+                              .map(habitMapper::toDTO)
+                              .toList();
     }
 
     @Override
@@ -47,7 +48,7 @@ public class HabitManagementService implements HabitService{
                                              () -> new HabitNotFoundException(String.format(HABIT_NOT_FOUND, name))
                                      );
 
-        return convertHabitToHabitDto(habit);
+        return habitMapper.toDTO(habit) ;
     }
 
     @Override
@@ -58,13 +59,7 @@ public class HabitManagementService implements HabitService{
             throw new HabitAlreadyExistsException(String.format(HABIT_ALREADY_EXIST, habit.name()));
         }
 
-        Habit record = new Habit(habit.name(),
-                                habit.frequency(),
-                                habit.startDate(),
-                                habit.endDate(),
-                                habit.reminder()
-        );
-
+        Habit record = habitMapper.toEntity(habit);
         habitRepository.saveAndFlush(record);
 
         return habit.name();
@@ -79,7 +74,7 @@ public class HabitManagementService implements HabitService{
                                                   .filter(habitDto ->
                                                       !habitRepository.existsByName(habitDto.name())
                                                   )
-                                                  .map(this::convertHabitDtoToHabit)
+                                                  .map(habitMapper::toEntity)
                                                   .toList();
 
         habitRepository.saveAllAndFlush(habitsToSave);
@@ -120,31 +115,5 @@ public class HabitManagementService implements HabitService{
 
         habitRepository.delete(habit);
         habitRepository.flush();
-    }
-
-    private HabitDTO convertHabitToHabitDto(Habit habit) throws ConversionException {
-        try {
-            return new HabitDTO(habit.getName(),
-                    habit.getFrequency(),
-                    habit.getStartDate(),
-                    habit.getEndDate(),
-                    habit.getReminder()
-            );
-        } catch (RuntimeException e) {
-            throw new ConversionException(Habit.class.getSimpleName(), HabitDTO.class.getSimpleName());
-        }
-    }
-
-    private Habit convertHabitDtoToHabit(HabitDTO habitDto) throws ConversionException {
-        try {
-            return new Habit(habitDto.name(),
-                    habitDto.frequency(),
-                    habitDto.startDate(),
-                    habitDto.endDate(),
-                    habitDto.reminder()
-            );
-        } catch (RuntimeException e) {
-            throw new ConversionException(HabitDTO.class.getSimpleName(), Habit.class.getSimpleName());
-        }
     }
 }

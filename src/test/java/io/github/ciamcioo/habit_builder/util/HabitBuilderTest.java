@@ -88,7 +88,7 @@ public class HabitBuilderTest {
         Habit builtHabit = builder.buildHabit();
 
         assertAll(
-                () -> assertEquals(uuid, builtHabit.getUUID()),
+                () -> assertEquals(uuid, builtHabit.getUuid()),
                 () -> assertEquals(name, builtHabit.getName()),
                 () -> assertEquals(frequency, builtHabit.getFrequency()),
                 () -> assertEquals(startDate, builtHabit.getStartDate()),
@@ -103,7 +103,7 @@ public class HabitBuilderTest {
         Habit builtHabit = builder.withTestValues().buildHabit();
 
         assertAll(
-                () -> assertInstanceOf(UUID.class, builtHabit.getUUID()),
+                () -> assertInstanceOf(UUID.class, builtHabit.getUuid()),
                 () -> assertEquals(testName, builtHabit.getName()),
                 () -> assertEquals(testFrequency, builtHabit.getFrequency()),
                 () -> assertEquals(testStartDate, builtHabit.getStartDate()),
