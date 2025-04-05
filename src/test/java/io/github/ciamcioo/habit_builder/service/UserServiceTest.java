@@ -14,7 +14,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import org.mockito.ArgumentCaptor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
@@ -25,24 +24,33 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest
 public class UserServiceTest {
-   public static final String TEST_EMAIL_ADDRESS = "test@gmail.com";
-   public static final String TEST_USERNAME      = "FooBarUsername";
+    public static final String TEST_EMAIL_ADDRESS = "test@gmail.com";
+    public static final String TEST_USERNAME      = "FooBarUsername";
 
-   private static UserService    userService;
-   private static UserRepository userRepository;
-   private static UserMapper     userMapper;
-   private static UserBuilder    userBuilder = UserBuilder.getInstance();
+    // TESTED SERVICE
+    private static UserService    userService;
 
-   private HabitRepository habitRepository;
+    // MOCKED SERVICE
+    private static UserMapper      userMapper;
+    private static UserRepository  userRepository;
+    private static HabitRepository habitRepository;
 
-    @BeforeEach
+    // HELPER OBJECT
+    private static UserBuilder userBuilder = UserBuilder.getInstance();
+    private static User        user;
+    private static UserDTO     userDTO;
+
+
+   @BeforeEach
    void beforeEachSetUp() {
-      userRepository = mock(UserRepository.class);
-      userMapper = mock(UserMapper.class);
-      userService = new UserManagementService(userRepository, userMapper);
-      userBuilder = userBuilder.withTestValues();
+       userMapper = mock(UserMapper.class);
+       userRepository = mock(UserRepository.class);
+       habitRepository = mock(HabitRepository.class);
+       userService = new UserManagementService(userRepository, userMapper);
 
-      habitRepository = mock(HabitRepository.class);
+       userBuilder = userBuilder.withTestValues();
+       user = userBuilder.withEmail(TEST_EMAIL_ADDRESS).buildUser();
+       userDTO = userBuilder.buildUserDTO();
    }
 
 
@@ -61,6 +69,7 @@ public class UserServiceTest {
        when(userRepository.findAll()).thenReturn(List.of());
 
        assertTrue(userService.getAllUsers().isEmpty());
+
        verify(userRepository).findAll();
    }
 
@@ -75,6 +84,7 @@ public class UserServiceTest {
        when(userRepository.findAll()).thenReturn(users);
 
        assertFalse(userService.getAllUsers().isEmpty());
+
        verify(userRepository).findAll();
    }
 
@@ -83,9 +93,6 @@ public class UserServiceTest {
    @Test
    @DisplayName("Method getUser() cannot return null")
    void getUserCanNotReturnNull() {
-       User user = userBuilder.withEmail(TEST_EMAIL_ADDRESS).buildUser();
-       UserDTO userDTO = userBuilder.buildUserDTO();
-
        when(userRepository.findUserByEmail(TEST_EMAIL_ADDRESS)).thenReturn(Optional.of(user));
        when(userMapper.toDTO(user)).thenReturn(userDTO);
 
@@ -95,28 +102,24 @@ public class UserServiceTest {
    @Test
    @DisplayName("Method getUser() should return user with matching email address to argument email address")
    void returnUserEmailMustMatchGetEmailInArgument() {
-       User user = userBuilder.withEmail(TEST_EMAIL_ADDRESS).buildUser();
-       UserDTO userDTO = userBuilder.buildUserDTO();
-
        when(userRepository.findUserByEmail(TEST_EMAIL_ADDRESS)).thenReturn(Optional.of(user));
        when(userMapper.toDTO(user)).thenReturn(userDTO);
 
        UserDTO resultUser = userService.getUser(TEST_EMAIL_ADDRESS);
 
        assertEquals(TEST_EMAIL_ADDRESS, resultUser.email());
+
        verify(userRepository).findUserByEmail(TEST_EMAIL_ADDRESS);
    }
 
    @Test
    @DisplayName("Method getUser() should return UserDTO matching to test UserDTO")
    void returnUserObjectMustMuchTheTestUserDTOObject() {
-       User user = userBuilder.buildUser();
-       UserDTO userDTO = userBuilder.buildUserDTO();
-
        when(userRepository.findUserByEmail(userDTO.email())).thenReturn(Optional.of(user));
        when(userMapper.toDTO(user)).thenReturn(userDTO);
 
        assertEquals(userDTO, userService.getUser(userDTO.email()));
+
        verify(userRepository).findUserByEmail(user.getEmail());
    }
 
@@ -128,6 +131,7 @@ public class UserServiceTest {
        when(userRepository.findUserByEmail(testEmail)).thenReturn(Optional.empty());
 
        assertThrows(UserNotFoundException.class, () -> userService.getUser(testEmail));
+
        verify(userRepository).findUserByEmail(testEmail);
    }
 
@@ -136,9 +140,6 @@ public class UserServiceTest {
    @Test
    @DisplayName("Method addUser() should not return the null value")
    void addUserShouldNotReturnNull() {
-       User user = userBuilder.buildUser();
-       UserDTO userDTO = userBuilder.withEmail(TEST_EMAIL_ADDRESS).buildUserDTO();
-
        when(userMapper.toEntity(userDTO)).thenReturn(user);
 
        assertNotNull(userService.addUser(userDTO));
@@ -147,25 +148,21 @@ public class UserServiceTest {
    @Test
    @DisplayName("Method addUser() should return the name of created user")
    void addUserShouldReturnTheGetUsernameOfCreatedUser() {
-       User user = userBuilder.withId(null).buildUser();
-       UserDTO userDTO = userBuilder.buildUserDTO();
-
        when(userMapper.toEntity(userDTO)).thenReturn(user);
 
        assertEquals(userDTO.username(), userService.addUser(userDTO));
+
        verify(userRepository).saveAndFlush(user);
    }
 
    @Test
    @DisplayName("Method addUser() should throw user already exists exception if user with specified email already exists.")
    void addUserShouldThrowUserAlreadyExistsException() {
-       UserDTO userDTO = userBuilder.buildUserDTO();
-       User userEntity = userBuilder.buildUser();
-
-       when(userRepository.findUserByEmail(userDTO.email())).thenReturn(Optional.of(userEntity));
+       when(userRepository.findUserByEmail(userDTO.email())).thenReturn(Optional.of(user));
 
        assertThrows(UserAlreadyExistsException.class, () -> userService.addUser(userDTO));
-       verify(userRepository, never()).saveAndFlush(userEntity);
+
+       verify(userRepository, never()).saveAndFlush(user);
    }
 
    // ADD MULTIPLE USERS AT ONCE TEST
@@ -180,16 +177,16 @@ public class UserServiceTest {
    @DisplayName("Method addUsers() should return List of the same size as the argument List")
    void addUsersShouldReturnTheSameListSizeAsArgumentList() {
        List<UserDTO> userDTOs = List.of(
-               userBuilder.buildUserDTO(),
+               userBuilder.withTestValues()
+                          .buildUserDTO(),
                userBuilder.withEmail(TEST_EMAIL_ADDRESS)
                           .withUsername(TEST_USERNAME)
                           .buildUserDTO()
        );
 
-       userBuilder = userBuilder.withTestValues();
-
        List<User> users = List.of(
-               userBuilder.buildUser(),
+               userBuilder.withTestValues()
+                          .buildUser(),
                userBuilder.withEmail(TEST_EMAIL_ADDRESS)
                           .withUsername(TEST_USERNAME)
                           .buildUser()
@@ -199,6 +196,7 @@ public class UserServiceTest {
        when(userMapper.toEntity(userDTOs.get(1))).thenReturn(users.get(1));
 
        assertEquals(userDTOs.size(), userService.addUsers(userDTOs).size());
+
        verify(userRepository).saveAllAndFlush(anyList());
    }
 
@@ -206,19 +204,19 @@ public class UserServiceTest {
    @DisplayName("Method addUsers() should return String List with usernames of added user")
    void addUsersShouldReturnGetUsernameList() {
        List<UserDTO> userDTOs = List.of(
-               userBuilder.buildUserDTO(),
+               userBuilder.withTestValues()
+                          .buildUserDTO(),
                userBuilder.withEmail(TEST_EMAIL_ADDRESS)
-                       .withUsername(TEST_USERNAME)
-                       .buildUserDTO()
+                          .withUsername(TEST_USERNAME)
+                          .buildUserDTO()
        );
 
-       userBuilder = userBuilder.withTestValues();
-
        List<User> users = List.of(
-               userBuilder.buildUser(),
+               userBuilder.withTestValues()
+                          .buildUser(),
                userBuilder.withEmail(TEST_EMAIL_ADDRESS)
-                       .withUsername(TEST_USERNAME)
-                       .buildUser()
+                          .withUsername(TEST_USERNAME)
+                          .buildUser()
        );
 
        when(userMapper.toEntity(userDTOs.get(0))).thenReturn(users.get(0));
@@ -233,37 +231,35 @@ public class UserServiceTest {
        verify(userRepository).saveAllAndFlush(anyList());
    }
 
-  @Test
-  @DisplayName("Method addUsers() should add only unique users from argument List")
-  void addUsersShouldOnlyAddUniqueUsersToDatabase() {
-       int expectedSize = 1;
-       List<UserDTO> notUniqueUserDTOs = List.of(
-             userBuilder.withEmail(TEST_EMAIL_ADDRESS).buildUserDTO(),
-             userBuilder.withEmail(TEST_EMAIL_ADDRESS).buildUserDTO()
-       );
+   @Test
+   @DisplayName("Method addUsers() should add only unique users from argument List")
+   void addUsersShouldOnlyAddUniqueUsersToDatabase() {
+        int expectedSize = 1;
+        List<UserDTO> notUniqueUserDTOs = List.of(
+              userBuilder.withEmail(TEST_EMAIL_ADDRESS).buildUserDTO(),
+              userBuilder.withEmail(TEST_EMAIL_ADDRESS).buildUserDTO()
+        );
 
-       User user = userBuilder.buildUser();
+        User user = userBuilder.buildUser();
 
-       when(userMapper.toEntity(any(UserDTO.class))).thenReturn(user);
-       when(habitRepository.findHabitByName(TEST_EMAIL_ADDRESS)).thenReturn(Optional.empty());
+        when(userMapper.toEntity(any(UserDTO.class))).thenReturn(user);
+        when(habitRepository.findHabitByName(TEST_EMAIL_ADDRESS)).thenReturn(Optional.empty());
 
-       ArgumentCaptor<List<User>> captor = ArgumentCaptor.forClass(List.class);
+        ArgumentCaptor<List<User>> captor = ArgumentCaptor.forClass(List.class);
+        int resultSize = userService.addUsers(notUniqueUserDTOs).size();
 
-       assertEquals(expectedSize, userService.addUsers(notUniqueUserDTOs).size());
-       verify(userRepository).saveAllAndFlush(captor.capture());
+        // Reverse order of assert and verify is needed for proper call of capture()
+        verify(userRepository).saveAllAndFlush(captor.capture());
 
-       List<User> userSaveList = captor.getValue();
-       assertEquals(expectedSize, userSaveList.size());
-  }
+        assertEquals(expectedSize, resultSize);
+        assertEquals(expectedSize, captor.getValue().size());
+   }
 
    // UPDATE USER TESTS
 
    @Test
    @DisplayName("Method updateUser() should not return null value")
    void updateUserShouldNotReturnNullValue() {
-       User user = userBuilder.buildUser();
-       UserDTO userDTO = userBuilder.buildUserDTO();
-
        when(userRepository.findUserByEmail(TEST_EMAIL_ADDRESS)).thenReturn(Optional.of(user));
        when(userMapper.toDTO(user)).thenReturn(userDTO);
 
@@ -273,9 +269,6 @@ public class UserServiceTest {
    @Test
    @DisplayName("Method updateUser() should return UserDTO that matches updated object")
    void updateUserShouldReturnUserDTOObjectWhichWillMuchUpdateObject() {
-       User user = userBuilder.buildUser();
-       UserDTO userDTO = userBuilder.buildUserDTO();
-
        when(userRepository.findUserByEmail(TEST_EMAIL_ADDRESS)).thenReturn(Optional.of(user));
        when(userMapper.toDTO(user)).thenReturn(userDTO);
 
@@ -285,8 +278,7 @@ public class UserServiceTest {
    @Test
    @DisplayName("Method updateUser() should throw new UserAlreadyExistsException if user tries to updated email to already existing one")
    void updateUserShouldThrowUserAlreadyExistsExceptionIfGetEmailOfUpdatedUserIsAlreadyInDatabase() {
-       UserDTO userToUpdate = userBuilder.withEmail(TEST_EMAIL_ADDRESS)
-                                         .buildUserDTO();
+       UserDTO userToUpdate = userDTO;
        String tmpEmailAddress = "otherTestEmail@gmail.com";
 
        when(userRepository.findUserByEmail(tmpEmailAddress)).thenReturn(Optional.of(new User()));
@@ -298,11 +290,10 @@ public class UserServiceTest {
    @Test
    @DisplayName("Method updateUser() throw new UserNotFoundException if User with specific email address doesn't exist")
    void updateUserShouldThrowUserNotFoundException() {
-       UserDTO userDTO = userBuilder.buildUserDTO();
-
        when(userRepository.findUserByEmail(TEST_EMAIL_ADDRESS)).thenReturn(Optional.empty());
 
        assertThrows(UserNotFoundException.class, () -> userService.updateUser(TEST_EMAIL_ADDRESS, userDTO));
+
        verify(userRepository, never()).saveAndFlush(any(User.class));
    }
 
@@ -314,6 +305,7 @@ public class UserServiceTest {
        when(userRepository.findUserByEmail(TEST_EMAIL_ADDRESS)).thenReturn(Optional.empty());
 
        assertThrows(UserNotFoundException.class, () -> userService.deleteUser(TEST_EMAIL_ADDRESS));
+
        verify(userRepository, never()).delete(any(User.class));
        verify(userRepository, never()).flush();
    }
@@ -321,8 +313,6 @@ public class UserServiceTest {
    @Test
    @DisplayName("Method deleteUser() should call delete method and flush method on the userRepository interface")
    void deleterUserShouldCallUserRepositoryDeleteAndFlushMethod() {
-       User user = userBuilder.withTestValues().buildUser();
-
        when(userRepository.findUserByEmail(TEST_EMAIL_ADDRESS)).thenReturn(Optional.of(user));
 
        userService.deleteUser(TEST_EMAIL_ADDRESS);

@@ -2,7 +2,6 @@ package io.github.ciamcioo.habit_builder.util;
 
 import io.github.ciamcioo.habit_builder.model.dto.UserDTO;
 import io.github.ciamcioo.habit_builder.model.entity.User;
-import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
@@ -19,7 +18,6 @@ public class UserBuilder {
         return new UserBuilder();
     }
 
-    @NotNull
     public  UserBuilder withTestValues() {
         this.id         = UUID.randomUUID();
         this.email      = "fooBar@gmail.com";

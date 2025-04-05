@@ -14,101 +14,95 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class HabitBuilderTest {
+    // CONSTANT
+    public static final String         DEF_NAME       = "Foo_habit";
+    public static final HabitFrequency DEF_FREQUENCY  = HabitFrequency.DAILY;
+    public static final LocalDate      DEF_START_TIME = LocalDate.now().minusDays(1);
+    public static final LocalDate      DEF_END_TIME   = LocalDate.now().plusYears(1);
+    public static final Boolean        DEF_REMINDER   = true;
 
-    public static final String         testName      = "Foo_habit";
-    public static final HabitFrequency testFrequency = HabitFrequency.DAILY;
-    public static final LocalDate      testStartDate = LocalDate.now().minusDays(1);
-    public static final LocalDate      testEndDate   = LocalDate.now().plusYears(1);
+    public static final UUID           ID         = UUID.randomUUID();
+    public static final String         NAME       = "Habit name";
+    public static final HabitFrequency FREQUENCY  = HabitFrequency.MONTHLY;
+    public static final LocalDate      START_DATE = LocalDate.now().minusDays(4);
+    public static final LocalDate      END_DATE   = LocalDate.now().plusDays(5);
+    public static final Boolean        REMINDER   = false;
 
-    HabitBuilder builder;
+    // TESTED SERVICE
+    HabitBuilder habitBuilder;
 
 
     @BeforeEach
     void setup() {
-        builder = HabitBuilder.getInstance();
+        habitBuilder = HabitBuilder.getInstance();
     }
 
     @Test
-    void testBuilderHabitInputData_HabitDataShouldBeTheSameAsBuilderOne() {
-
-        String         name      = "Habit name";
-        HabitFrequency frequency = HabitFrequency.MONTHLY;
-        LocalDate      startDate = LocalDate.now().minusDays(4);
-        LocalDate      endDate   = LocalDate.now().plusDays(5);
-        Boolean        reminder  = false;
-
-        builder = builder.withName(name)
-                .withFrequency(frequency)
-                .withStartDate(startDate)
-                .withEndDate(endDate)
-                .withReminder(reminder);
-
-        HabitDTO builtHabit = builder.buildHabitDto();
+    @DisplayName("Build object should have the same values as defined fields")
+    void buildObjectShouldHaveTheSameValuesAsDefinedFields() {
+        HabitDTO builtHabitDto = habitBuilder.withName(NAME)
+                                             .withFrequency(FREQUENCY)
+                                             .withStartDate(START_DATE)
+                                             .withEndDate(END_DATE)
+                                             .withReminder(REMINDER)
+                                             .buildHabitDto();
 
         assertAll(
-                () -> assertEquals(name, builtHabit.name()),
-                () -> assertEquals(frequency, builtHabit.frequency()),
-                () -> assertEquals(startDate, builtHabit.startDate()),
-                () -> assertEquals(endDate, builtHabit.endDate()),
-                () -> assertEquals(reminder, builtHabit.reminder())
+                () -> assertEquals(NAME,       builtHabitDto.name()),
+                () -> assertEquals(FREQUENCY,  builtHabitDto.frequency()),
+                () -> assertEquals(START_DATE, builtHabitDto.startDate()),
+                () -> assertEquals(END_DATE,   builtHabitDto.endDate()),
+                () -> assertEquals(REMINDER,   builtHabitDto.reminder())
         );
     }
 
     @Test
-    void testBuilderHabitWithDefaultValues_BuildObjectShouldHaveTheSameValues() {
-        HabitDTO builtHabit = builder.withTestValues().buildHabitDto();
+    @DisplayName("Built Habit object should have fields set to default values.")
+    void buildHabitShouldHaveFieldsSetToDefaultValues() {
+        HabitDTO builtHabitDto = habitBuilder.withTestValues().buildHabitDto();
 
         assertAll(
-                () -> assertEquals(testName, builtHabit.name()),
-                () -> assertEquals(testFrequency, builtHabit.frequency()),
-                () -> assertEquals(testStartDate, builtHabit.startDate()),
-                () -> assertEquals(LocalDate.now().plusYears(1), builtHabit.endDate()),
-                () -> assertEquals(true, builtHabit.reminder())
+                () -> assertEquals(DEF_NAME,       builtHabitDto.name()),
+                () -> assertEquals(DEF_FREQUENCY,  builtHabitDto.frequency()),
+                () -> assertEquals(DEF_START_TIME, builtHabitDto.startDate()),
+                () -> assertEquals(DEF_END_TIME,   builtHabitDto.endDate()),
+                () -> assertEquals(DEF_REMINDER,   builtHabitDto.reminder())
         );
     }
 
     @Test
     @DisplayName("The buildHabit() method should return a Habit object with fields equals to set values.")
     void testBuildHabitForSetValues() {
-
-        UUID           uuid      = UUID.randomUUID();
-        String         name      = "Habit name";
-        HabitFrequency frequency = HabitFrequency.MONTHLY;
-        LocalDate      startDate = LocalDate.now().minusDays(4);
-        LocalDate      endDate   = LocalDate.now().plusDays(5);
-        Boolean        reminder  = false;
-
-        builder.withUUID(uuid)
-                .withName(name)
-                .withFrequency(frequency)
-                .withStartDate(startDate)
-                .withEndDate(endDate)
-                .withReminder(reminder);
-
-        Habit builtHabit = builder.buildHabit();
+        Habit builtHabit = habitBuilder.withUUID(ID)
+                                       .withName(NAME)
+                                       .withFrequency(FREQUENCY)
+                                       .withStartDate(START_DATE)
+                                       .withEndDate(END_DATE)
+                                       .withReminder(REMINDER)
+                                       .buildHabit();
 
         assertAll(
-                () -> assertEquals(uuid, builtHabit.getUuid()),
-                () -> assertEquals(name, builtHabit.getName()),
-                () -> assertEquals(frequency, builtHabit.getFrequency()),
-                () -> assertEquals(startDate, builtHabit.getStartDate()),
-                () -> assertEquals(endDate, builtHabit.getEndDate()),
-                () -> assertEquals(reminder, builtHabit.getReminder())
+                () -> assertEquals(ID,         builtHabit.getUuid()),
+                () -> assertEquals(NAME,       builtHabit.getName()),
+                () -> assertEquals(FREQUENCY,  builtHabit.getFrequency()),
+                () -> assertEquals(START_DATE, builtHabit.getStartDate()),
+                () -> assertEquals(END_DATE,   builtHabit.getEndDate()),
+                () -> assertEquals(REMINDER,   builtHabit.getReminder())
         );
     }
 
     @Test
     @DisplayName("The buildHabit() method should return a Habit object with fields set to their default values")
     void testBuildHabitWithDefaultValues() {
-        Habit builtHabit = builder.withTestValues().buildHabit();
+        Habit builtHabit = habitBuilder.withTestValues().buildHabit();
 
         assertAll(
                 () -> assertInstanceOf(UUID.class, builtHabit.getUuid()),
-                () -> assertEquals(testName, builtHabit.getName()),
-                () -> assertEquals(testFrequency, builtHabit.getFrequency()),
-                () -> assertEquals(testStartDate, builtHabit.getStartDate()),
-                () -> assertEquals(testEndDate, builtHabit.getEndDate()),
-                () -> assertEquals(true, builtHabit.getReminder())
+                () -> assertEquals(DEF_NAME,       builtHabit.getName()),
+                () -> assertEquals(DEF_FREQUENCY,  builtHabit.getFrequency()),
+                () -> assertEquals(DEF_START_TIME, builtHabit.getStartDate()),
+                () -> assertEquals(DEF_END_TIME,   builtHabit.getEndDate()),
+                () -> assertEquals(DEF_REMINDER,   builtHabit.getReminder())
         );
     }
 
