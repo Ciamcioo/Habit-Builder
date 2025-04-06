@@ -21,8 +21,8 @@ import java.util.*;
 public class UserManagementService implements UserService {
     private static final Logger log = LoggerFactory.getLogger(UserManagementService.class);
 
-    private static final String USER_NOT_FOUND      = "User with email = %s not found";
-    private static final String USER_ALREADY_EXISTS = "User with email: %s already exists";
+    private static final String USER_NOT_FOUND_MESSAGE_FORMAT      = "User with given email: %s not found";
+    private static final String USER_ALREADY_EXISTS_MESSAGE_FORMAT = "User with given email: %s already exists";
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
@@ -49,7 +49,7 @@ public class UserManagementService implements UserService {
     public UserDTO getUser(String email) {
         User persistedUser = userRepository.findUserByEmail(email)
                                            .orElseThrow(
-                                                   () -> new UserNotFoundException(String.format(USER_NOT_FOUND, email))
+                                                   () -> new UserNotFoundException(String.format(USER_NOT_FOUND_MESSAGE_FORMAT, email))
                                            );
 
         return userMapper.toDTO(persistedUser);
@@ -59,7 +59,7 @@ public class UserManagementService implements UserService {
     @EnableMethodLogging
     public String addUser(UserDTO userDTO) {
         if (userRepository.findUserByEmail(userDTO.email()).isPresent()) {
-            throw new UserAlreadyExistsException(String.format(USER_ALREADY_EXISTS, userDTO.email()));
+            throw new UserAlreadyExistsException(String.format(USER_ALREADY_EXISTS_MESSAGE_FORMAT, userDTO.email()));
         }
 
         User user = userMapper.toEntity(userDTO);
@@ -90,12 +90,12 @@ public class UserManagementService implements UserService {
     @EnableMethodLogging
     public UserDTO updateUser(String email, UserDTO updatedUser) {
         User userToUpdate = userRepository.findUserByEmail(email)
-                                          .orElseThrow(() -> new UserNotFoundException(String.format(USER_NOT_FOUND, email)));
+                                          .orElseThrow(() -> new UserNotFoundException(String.format(USER_NOT_FOUND_MESSAGE_FORMAT, email)));
 
         if (!email.equals(updatedUser.email()) &&
             userRepository.findUserByEmail(updatedUser.email()).isPresent()) {
 
-            throw new UserAlreadyExistsException(String.format(USER_ALREADY_EXISTS, updatedUser.email()));
+            throw new UserAlreadyExistsException(String.format(USER_ALREADY_EXISTS_MESSAGE_FORMAT, updatedUser.email()));
         }
 
         userToUpdate.setEmail(updatedUser.email());
@@ -112,9 +112,9 @@ public class UserManagementService implements UserService {
     @EnableExceptionLogging
     public void deleteUser(String email) {
         User userToDelete = userRepository.findUserByEmail(email)
-                                          .orElseThrow(() -> new UserNotFoundException(String.format(USER_NOT_FOUND, email)));
+                                          .orElseThrow(() -> new UserNotFoundException(String.format(USER_NOT_FOUND_MESSAGE_FORMAT, email)));
 
-        log.info("Retried object: {}", userToDelete);
+        log.info("Retrieved object: {}", userToDelete);
 
         userRepository.delete(userToDelete);
         userRepository.flush();

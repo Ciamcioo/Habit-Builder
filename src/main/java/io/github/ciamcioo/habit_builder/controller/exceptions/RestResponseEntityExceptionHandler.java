@@ -25,7 +25,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     @ExceptionHandler(value = {
         HabitAlreadyExistsException.class,
         UserAlreadyExistsException.class,
-        ConversionException.class
+        MappingException.class
     })
     @EnableMethodLogging
     protected ResponseEntity<Error> badRequestExceptionHandler(RuntimeException exception) {

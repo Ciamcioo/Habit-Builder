@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 
 public class HabitServiceTest {
     // CONSTANT
-    public static final String HABIT_NOT_FOUND_EXCEPTION_MESSAGE = "Habit with name = testHabit not found";
+    public static final String HABIT_NOT_FOUND_EXCEPTION_MESSAGE = "Habit with given name: testHabit not found";
     public static final String TEST_HABIT_NAME                   = "testHabit";
 
     // TESTED SERVICE

@@ -1,12 +1,12 @@
 package io.github.ciamcioo.habit_builder.service.mapper;
 
-import io.github.ciamcioo.habit_builder.exception.ConversionException;
+import io.github.ciamcioo.habit_builder.exception.MappingException;
 import io.github.ciamcioo.habit_builder.model.dto.HabitDTO;
 import io.github.ciamcioo.habit_builder.model.entity.Habit;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring",  unexpectedValueMappingException = ConversionException.class)
+@Mapper(componentModel = "spring",  unexpectedValueMappingException = MappingException.class)
 public interface HabitMapper {
 
     @Mapping(target = "name",      source = "entity.name")

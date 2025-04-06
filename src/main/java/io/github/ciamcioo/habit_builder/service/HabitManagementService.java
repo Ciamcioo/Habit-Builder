@@ -17,8 +17,8 @@ import java.util.*;
 
 @Service
 public class HabitManagementService implements HabitService{
-    private static final String HABIT_NOT_FOUND     = "Habit with name = %s not found";
-    private static final String HABIT_ALREADY_EXIST = "Habit with name = %s already exists in database";
+    private static final String HABIT_NOT_FOUND_MESSAGE_FORMAT     = "Habit with given name: %s not found";
+    private static final String HABIT_ALREADY_EXIST_MESSAGE_FORMAT = "Habit with given name: %s already exists in database";
 
     private final HabitRepository habitRepository;
     private final HabitMapper habitMapper;
@@ -45,7 +45,7 @@ public class HabitManagementService implements HabitService{
     public HabitDTO getHabitByName(String name) {
         Habit habit = habitRepository.findHabitByName(name)
                                      .orElseThrow(
-                                             () -> new HabitNotFoundException(String.format(HABIT_NOT_FOUND, name))
+                                             () -> new HabitNotFoundException(String.format(HABIT_NOT_FOUND_MESSAGE_FORMAT, name))
                                      );
 
         return habitMapper.toDTO(habit) ;
@@ -56,7 +56,7 @@ public class HabitManagementService implements HabitService{
     @EnableExceptionLogging
     public String addHabit(HabitDTO habit) {
         if (habitRepository.existsByName(habit.name())) {
-            throw new HabitAlreadyExistsException(String.format(HABIT_ALREADY_EXIST, habit.name()));
+            throw new HabitAlreadyExistsException(String.format(HABIT_ALREADY_EXIST_MESSAGE_FORMAT, habit.name()));
         }
 
         Habit record = habitMapper.toEntity(habit);
@@ -86,13 +86,12 @@ public class HabitManagementService implements HabitService{
     @EnableMethodLogging
     @EnableExceptionLogging
     public HabitDTO updateHabit(String habitName, HabitDTO updatedHabit) {
-
         Habit record = habitRepository.findHabitByName(habitName)
-                                      .orElseThrow(() -> new HabitNotFoundException(String.format(HABIT_NOT_FOUND, habitName)));
+                                      .orElseThrow(() -> new HabitNotFoundException(String.format(HABIT_NOT_FOUND_MESSAGE_FORMAT, habitName)));
 
         Optional<Habit> recordWithUpdateName = habitRepository.findHabitByName(updatedHabit.name());
         if (recordWithUpdateName.isPresent()) {
-            throw new HabitAlreadyExistsException(String.format(HABIT_ALREADY_EXIST, updatedHabit.name()));
+            throw new HabitAlreadyExistsException(String.format(HABIT_ALREADY_EXIST_MESSAGE_FORMAT, updatedHabit.name()));
         }
 
         record.setName(updatedHabit.name());
@@ -111,7 +110,7 @@ public class HabitManagementService implements HabitService{
     @EnableExceptionLogging
     public void deleteHabit(String habitName) {
         Habit habit = habitRepository.findHabitByName(habitName)
-                                     .orElseThrow(() -> new HabitNotFoundException(String.format(HABIT_NOT_FOUND, habitName)));
+                                     .orElseThrow(() -> new HabitNotFoundException(String.format(HABIT_NOT_FOUND_MESSAGE_FORMAT, habitName)));
 
         habitRepository.delete(habit);
         habitRepository.flush();
