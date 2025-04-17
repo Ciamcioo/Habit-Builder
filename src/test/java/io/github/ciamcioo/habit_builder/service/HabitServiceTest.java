@@ -9,13 +9,17 @@ import io.github.ciamcioo.habit_builder.exception.HabitAlreadyExistsException;
 import io.github.ciamcioo.habit_builder.exception.HabitNotFoundException;
 import io.github.ciamcioo.habit_builder.repository.HabitRepository;
 
+import jakarta.json.Json;
+import jakarta.json.JsonMergePatch;
+import jakarta.json.JsonObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -29,8 +33,9 @@ public class HabitServiceTest {
     private static HabitService    habitService;
 
     // MOCK SERVICE
-    private static HabitRepository habitRepository;
-    private static HabitMapper     habitMapper;
+    private static HabitRepository  habitRepository;
+    private static HabitMapper      habitMapper;
+    private static MergePatchHelper mergePatchHelper;
 
     // HELPER OBJECTS
     private static HabitBuilder habitBuilder = HabitBuilder.getInstance();
@@ -41,7 +46,8 @@ public class HabitServiceTest {
     void setup() {
         habitRepository = mock(HabitRepository.class);
         habitMapper = mock(HabitMapper.class);
-        habitService = new HabitManagementService(habitRepository, habitMapper);
+        mergePatchHelper = mock(MergePatchHelper.class);
+        habitService = Mockito.spy(new HabitManagementService(habitRepository, habitMapper, mergePatchHelper));
 
         habitBuilder = habitBuilder.withTestValues();
         habit = habitBuilder.buildHabit();
@@ -220,16 +226,17 @@ public class HabitServiceTest {
     }
 
     @Test
-    @DisplayName("The updateHabit() method should throw an exception HabitNotFoundException with appropriate message if habit with provided name hasn't been found")
+    @DisplayName("The updateHabit() method should call addHabit method if there is not habit with specified habit name argument")
     void updateHabitMethodShouldThrowHabitNotFoundException() {
         String habitToUpdateName = TEST_HABIT_NAME;
 
         when(habitRepository.findHabitByName(habitToUpdateName)).thenReturn(Optional.empty());
+        when(habitMapper.toEntity(habitDto)).thenReturn(habit);
 
-        Exception exception = assertThrows(HabitNotFoundException.class, () -> habitService.updateHabit(habitToUpdateName, habitDto));
-        assertEquals(HABIT_NOT_FOUND_EXCEPTION_MESSAGE, exception.getMessage());
+        habitService.updateHabit(habitToUpdateName, habitDto);
 
-        verify(habitRepository, never()).saveAndFlush(any(Habit.class));
+        verify(habitService).addHabit(habitDto);
+        verify(habitRepository).saveAndFlush(any(Habit.class));
     }
 
     @Test
@@ -237,9 +244,9 @@ public class HabitServiceTest {
     void updateHabitMethodShouldReturnUpdatedRecord() {
         String habitToUpdateName = TEST_HABIT_NAME;
         HabitDTO updatedHabitDTO = habitBuilder.withTestValues()
-                                          .withName("Updated test habit")
-                                          .withFrequency(HabitFrequency.MONTHLY)
-                                          .buildHabitDto();
+                                               .withName("Updated test habit")
+                                               .withFrequency(HabitFrequency.MONTHLY)
+                                               .buildHabitDto();
 
         when(habitRepository.findHabitByName(habitToUpdateName)).thenReturn(Optional.of(habit));
 
@@ -255,8 +262,8 @@ public class HabitServiceTest {
         String habitName = TEST_HABIT_NAME;
         String updatedHabitName = "updatedHabitName";
         HabitDTO updatedHabit = habitBuilder.withTestValues()
-                                       .withName(updatedHabitName)
-                                       .buildHabitDto();
+                                            .withName(updatedHabitName)
+                                            .buildHabitDto();
 
         when(habitRepository.findHabitByName(habitName)).thenReturn(Optional.of(new Habit()));
         when(habitRepository.findHabitByName(updatedHabitName)).thenReturn(Optional.of(new Habit()));
@@ -265,6 +272,96 @@ public class HabitServiceTest {
 
         verify(habitRepository, never()).saveAndFlush(any(Habit.class));
     }
+
+    @Test
+    @DisplayName("Partial update in updatePartialHabit() method should not return null")
+    void partialHabitUpdateShouldNotReturnNullValue() {
+        JsonObject json = Json.createObjectBuilder().build();
+        JsonMergePatch mergePatch = Json.createMergePatch(json);
+
+        when(habitRepository.findHabitByName(TEST_HABIT_NAME)).thenReturn(Optional.of(habit));
+        when(habitMapper.toDTO(habit)).thenReturn(habitDto);
+
+
+        assertNotNull(habitService.partialHabitUpdate(TEST_HABIT_NAME, mergePatch));
+    }
+
+    @Test
+    @DisplayName("Partial update in updatePartialHabit() method should return habit with the same name as argument name")
+    void partialHabitUpdateShouldReturnHabitWithMatchingArgumentName() {
+        String habitNameToUpdate = habit.getName();
+        JsonObject json = Json.createObjectBuilder().build();
+        JsonMergePatch mergePatch = Json.createMergePatch(json);
+
+        when(habitRepository.findHabitByName(habitNameToUpdate)).thenReturn(Optional.of(habit));
+        when(habitMapper.toDTO(habit)).thenReturn(habitDto);
+
+        HabitDTO resultHabitDTO = habitService.partialHabitUpdate(habitNameToUpdate, mergePatch);
+
+        assertEquals(habitNameToUpdate, resultHabitDTO.name());
+    }
+
+    @Test
+    @DisplayName("Partial update should make a call to habit repository")
+    void partialHabitUpdateShouldMakeACallToHabitRepository() {
+        JsonObject json = Json.createObjectBuilder().build();
+        JsonMergePatch mergePatch = Json.createMergePatch(json);
+
+        when(habitRepository.findHabitByName(TEST_HABIT_NAME)).thenReturn(Optional.of(habit));
+
+        habitService.partialHabitUpdate(TEST_HABIT_NAME, mergePatch);
+
+        verify(habitRepository).findHabitByName(TEST_HABIT_NAME);
+    }
+
+    @Test
+    @DisplayName("Partial update should throw HabitNotFoundException if habit with specified name hasn't been found")
+    void partialHabitUpdateShouldThrowHabitNotFoundException() {
+        JsonObject json = Json.createObjectBuilder().build();
+        JsonMergePatch mergePatch = Json.createMergePatch(json);
+        String notPersistedHabitName = TEST_HABIT_NAME;
+
+        when(habitRepository.findHabitByName(notPersistedHabitName)).thenReturn(Optional.empty());
+
+        assertThrows(HabitNotFoundException.class, () -> habitService.partialHabitUpdate(notPersistedHabitName, mergePatch));
+    }
+
+    @Test
+    @DisplayName("Partial update should return habitDTO with updated fields")
+    void partialHabitUpdateShouldReturnTheHabitDTOWithUpdateFields() {
+        String habitNameToUpdate = habit.getName();
+        JsonObject fieldsToUpdate = Json.createObjectBuilder()
+                                        .add("name", "New habit name")
+                                        .add("frequency", String.valueOf(HabitFrequency.WEEKLY))
+                                        .add("startDate", String.valueOf(LocalDate.of(1990, Month.APRIL, 1)))
+                                        .add("endDate", String.valueOf(LocalDate.of(1991, Month.APRIL ,1)))
+                                        .add("reminder", false)
+                                        .build();
+        JsonMergePatch updatePatch = Json.createMergePatch(fieldsToUpdate);
+        Habit updatedHabit = habitBuilder.withUUID(habit.getUuid())
+                                         .withName("New habit name")
+                                         .withFrequency(HabitFrequency.WEEKLY)
+                                         .withStartDate(LocalDate.of(1990, Month.APRIL, 1))
+                                         .withEndDate(LocalDate.of(1991, Month.APRIL, 1))
+                                         .withReminder(false)
+                                         .buildHabit();
+        HabitDTO updateHabitDTO = habitBuilder.buildHabitDto();
+
+        when(habitRepository.findHabitByName(habitNameToUpdate)).thenReturn(Optional.of(habit));
+        when(mergePatchHelper.mergePatch(updatePatch, habit, Habit.class)).thenReturn(updatedHabit);
+        when(habitMapper.toDTO(habit)).thenReturn(updateHabitDTO);
+
+        HabitDTO resultHabitDTO = habitService.partialHabitUpdate(habitNameToUpdate, updatePatch);
+
+        assertAll(
+                () -> assertEquals(fieldsToUpdate.getString("name"),      resultHabitDTO.name()),
+                () -> assertEquals(fieldsToUpdate.getString("frequency"), resultHabitDTO.frequency().toString()),
+                () -> assertEquals(fieldsToUpdate.getString("startDate"), resultHabitDTO.startDate().toString()),
+                () -> assertEquals(fieldsToUpdate.getString("endDate"),   resultHabitDTO.endDate().toString()),
+                () -> assertEquals(fieldsToUpdate.getBoolean("reminder"), resultHabitDTO.reminder())
+        );
+    }
+
 
     @Test
     @DisplayName("The deleteHabit() method should throw HabitNotFoundException with appropriate message if habit with provided habitName doesn't exist")

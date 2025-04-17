@@ -19,13 +19,11 @@ import java.util.Map;
 @RestControllerAdvice
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
-    public RestResponseEntityExceptionHandler() {
-    }
-
     @ExceptionHandler(value = {
         HabitAlreadyExistsException.class,
         UserAlreadyExistsException.class,
-        MappingException.class
+        MappingException.class,
+        IllegalArgumentException.class
     })
     @EnableMethodLogging
     protected ResponseEntity<Error> badRequestExceptionHandler(RuntimeException exception) {
@@ -47,9 +45,19 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         );
     }
 
+
+    @ExceptionHandler(value = {
+        ProcessingException.class
+    })
+    protected ResponseEntity<Error> processingExceptionHandler(RuntimeException exception) {
+        return new ResponseEntity<>(
+                new Error(exception.getMessage()),
+                HttpStatus.INTERNAL_SERVER_ERROR
+        );
+    }
+
     @Override
     @EnableMethodLogging
-
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException exception,  HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         Map<String, String> errors = new HashMap<>();
         exception.getAllErrors().forEach(error -> errors.put(

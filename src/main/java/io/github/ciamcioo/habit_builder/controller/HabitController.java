@@ -3,6 +3,7 @@ package io.github.ciamcioo.habit_builder.controller;
 import io.github.ciamcioo.habit_builder.model.dto.HabitDTO;
 import io.github.ciamcioo.habit_builder.service.HabitService;
 import io.github.ciamcioo.habit_builder.aspect.annotation.EnableMethodLogging;
+import jakarta.json.JsonMergePatch;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,6 +60,15 @@ public class HabitController {
     public ResponseEntity<HabitDTO> updateHabit(@PathVariable("name") String habitName, @RequestBody @Valid HabitDTO updatedHabit) {
         return new ResponseEntity<>(
                 habitService.updateHabit(habitName, updatedHabit),
+                HttpStatus.OK
+        );
+    }
+
+    @PatchMapping(value = "/habit/{name}", consumes =  "application/merge-patch+json")
+    @EnableMethodLogging
+    public ResponseEntity<HabitDTO> partialUpdateHabit(@PathVariable("name") String habitName, @RequestBody JsonMergePatch fieldsToUpdate) {
+        return new ResponseEntity<>(
+                habitService.partialHabitUpdate(habitName, fieldsToUpdate),
                 HttpStatus.OK
         );
     }

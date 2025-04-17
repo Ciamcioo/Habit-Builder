@@ -10,6 +10,7 @@ import io.github.ciamcioo.habit_builder.exception.HabitNotFoundException;
 import io.github.ciamcioo.habit_builder.repository.HabitRepository;
 
 import io.github.ciamcioo.habit_builder.service.mapper.HabitMapper;
+import jakarta.json.JsonMergePatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,11 +23,13 @@ public class HabitManagementService implements HabitService{
 
     private final HabitRepository habitRepository;
     private final HabitMapper habitMapper;
+    private final MergePatchHelper mergePatchHelper;
 
     @Autowired
-    public HabitManagementService(HabitRepository habitRepository, HabitMapper habitMapper) {
+    public HabitManagementService(HabitRepository habitRepository, HabitMapper habitMapper, MergePatchHelper mergePatchHelper) {
         this.habitRepository = habitRepository;
         this.habitMapper = habitMapper;
+        this.mergePatchHelper = mergePatchHelper;
     }
 
     @Override
@@ -86,13 +89,19 @@ public class HabitManagementService implements HabitService{
     @EnableMethodLogging
     @EnableExceptionLogging
     public HabitDTO updateHabit(String habitName, HabitDTO updatedHabit) {
-        Habit record = habitRepository.findHabitByName(habitName)
-                                      .orElseThrow(() -> new HabitNotFoundException(String.format(HABIT_NOT_FOUND_MESSAGE_FORMAT, habitName)));
+        Optional<Habit> recordOpt = habitRepository.findHabitByName(habitName);
 
-        Optional<Habit> recordWithUpdateName = habitRepository.findHabitByName(updatedHabit.name());
-        if (recordWithUpdateName.isPresent()) {
-            throw new HabitAlreadyExistsException(String.format(HABIT_ALREADY_EXIST_MESSAGE_FORMAT, updatedHabit.name()));
+        if (recordOpt.isEmpty()) {
+            addHabit(updatedHabit);
+            return updatedHabit;
         }
+
+        Habit record = recordOpt.get();
+
+        habitRepository.findHabitByName(updatedHabit.name())
+                       .ifPresent(ex -> {
+                           throw new HabitAlreadyExistsException();
+                       });
 
         record.setName(updatedHabit.name());
         record.setFrequency(updatedHabit.frequency());
@@ -103,6 +112,18 @@ public class HabitManagementService implements HabitService{
         habitRepository.saveAndFlush(record);
 
         return updatedHabit;
+    }
+
+    @Override
+    @EnableMethodLogging
+    @EnableExceptionLogging
+    public HabitDTO partialHabitUpdate(String habitName, JsonMergePatch fieldsToUpdate) {
+        Habit habit = habitRepository.findHabitByName(habitName)
+                                     .orElseThrow(HabitNotFoundException::new);
+
+        habit = mergePatchHelper.mergePatch(fieldsToUpdate, habit, Habit.class);
+
+        return habitMapper.toDTO(habit);
     }
 
     @Override
